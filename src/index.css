@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+@theme {
+  --color-qiyas-navy: #0B2545;
+  --color-qiyas-navyLight: #13315C;
+  --color-qiyas-teal: #0D9488;
+  --color-qiyas-tealHover: #0F766E;
+  --color-qiyas-tealLight: #CCFBF1;
+  --color-qiyas-surface: #F1F5F9;
+  --color-qiyas-card: #FFFFFF;
+  --color-qiyas-gold: #D97706;
+  --color-qiyas-goldLight: #FEF3C7;
+}
+
+html[dir="rtl"] body {
+  font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
+}
+
+html[dir="ltr"] body {
+  font-family: 'Plus Jakarta Sans', 'Cairo', sans-serif;
+}
+
+body {
+  background-color: #06281E;
+  color: #0F172A;
+}
+
+/* Smooth custom scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #041B14;
+}
+::-webkit-scrollbar-thumb {
+  background: #1E5A46;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2A7B60;
+}
+
+/* Qiyas Radio Option Styling */
+.qiyas-option {
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease, background-color 0.18s ease;
+}
+.qiyas-option:hover:not(.option-locked) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -4px rgba(13, 148, 136, 0.14);
+}
+
+/* Entrance & floating animations */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-view-enter {
+  animation: fadeSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(3deg); }
+}
+.animate-float-slow {
+  animation: floatSlow 4s ease-in-out infinite;
+}
+
+.subject-card {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.subject-card:hover {
+  transform: translateY(-4px);
+}
+
+.bg-subtle-grid {
+  background-color: #06281E;
+  background-image: radial-gradient(rgba(52, 211, 153, 0.14) 0.9px, transparent 0.9px);
+  background-size: 20px 20px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-view-enter,
+  .animate-float-slow {
+    animation: none !important;
+  }
+  .qiyas-option:hover:not(.option-locked),
+  .subject-card:hover {
+    transform: none !important;
+  }
+}

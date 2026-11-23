@@ -1,0 +1,3035 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAAT Computerized Practice Platform | منصة التدريب المحوسب للتحصيلي</title>
+
+  <!-- Google Fonts: Inter (English) & Cairo (Arabic) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            qiyas: {
+              navy: '#0B2545',
+              navyLight: '#13315C',
+              teal: '#0D9488',
+              tealHover: '#0F766E',
+              tealLight: '#CCFBF1',
+              surface: '#F1F5F9',
+              card: '#FFFFFF',
+              gold: '#D97706',
+              goldLight: '#FEF3C7'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    html[dir="rtl"] body {
+      font-family: 'Cairo', 'Inter', sans-serif;
+    }
+    html[dir="ltr"] body {
+      font-family: 'Inter', 'Cairo', sans-serif;
+    }
+    body {
+      background-color: #06281E;
+      color: #0F172A;
+    }
+
+    /* Smooth custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #041B14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1E5A46;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #2A7B60;
+    }
+
+    /* Qiyas Radio Option Styling */
+    .qiyas-option {
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .qiyas-option:hover:not(.option-locked) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px -4px rgba(13, 148, 136, 0.14);
+    }
+
+    /* Timer pulse when <= 10s */
+    @keyframes pulseUrgent {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    .timer-urgent {
+      animation: pulseUrgent 1s infinite;
+    }
+
+    /* Entrance & floating animations */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-view-enter {
+      animation: fadeSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-5px) rotate(3deg); }
+    }
+    .animate-float-slow {
+      animation: floatSlow 4s ease-in-out infinite;
+    }
+
+    .subject-card {
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+    }
+    .subject-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .bg-subtle-grid {
+      background-color: #06281E;
+      background-image: radial-gradient(rgba(52, 211, 153, 0.14) 0.9px, transparent 0.9px);
+      background-size: 20px 20px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col select-none sm:select-auto bg-subtle-grid">
+
+  <!-- ===================================================================== -->
+  <!-- TOP QIYAS COMPUTERIZED HEADER BAR                                     -->
+  <!-- ===================================================================== -->
+  <header class="bg-[#041B14] text-white shadow-md sticky top-0 z-40 border-b border-emerald-900/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <!-- Brand / Qiyas Mock Identity -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="handleLogoClick()">
+        <div class="w-10 h-10 rounded-xl bg-qiyas-teal flex items-center justify-center shadow-inner shrink-0">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div class="leading-tight">
+          <h1 id="hdr-title" class="font-bold text-sm sm:text-base tracking-wide text-white">
+            SAAT Computerized Practice Exam
+          </h1>
+          <p id="hdr-subtitle" class="text-[11px] sm:text-xs text-teal-300 font-medium">
+            Qiyas Computerized Test Simulation • Smart Practice
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Controls: Teacher Code Info + Compact Language Toggle ('ع') -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Teacher Code Management Button -->
+        <button
+          id="btn-teacher-settings"
+          onclick="openTeacherModal()"
+          title="Access Code Settings"
+          class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-qiyas-navyLight hover:bg-slate-700 text-xs text-slate-200 border border-slate-600 transition"
+        >
+          <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+          </svg>
+          <span id="hdr-teacher-btn">Access Code</span>
+        </button>
+
+        <!-- Compact Bilingual Toggle Button ('ع' / 'EN') -->
+        <button
+          onclick="toggleLanguage()"
+          title="Switch Language / تغيير اللغة"
+          class="w-9 h-9 rounded-xl bg-qiyas-teal hover:bg-qiyas-tealHover text-white font-extrabold shadow transition-all hover:scale-105 active:scale-95 flex items-center justify-center border border-teal-400/30"
+        >
+          <span id="lang-toggle-text" class="text-[11px] leading-none tracking-tight">ع</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- MAIN DYNAMIC APPLICATION CONTAINER                                    -->
+  <!-- ===================================================================== -->
+  <main id="app-root" class="flex-1 flex flex-col">
+    <!-- Views injected dynamically via JavaScript -->
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 1: PRACTICE MODE SELECTION (THIS PART ONLY vs CUMULATIVE)       -->
+  <!-- ===================================================================== -->
+  <div id="mode-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/65 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-view-enter">
+      <div class="bg-qiyas-navy text-white px-6 py-4 flex items-center justify-between">
+        <h3 id="mode-modal-title" class="font-bold text-base sm:text-lg">Choose Practice Mode</h3>
+        <button onclick="closeModeModal()" class="text-slate-300 hover:text-white p-1 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+          <p id="mode-selected-chapter" class="font-bold text-qiyas-navy text-sm sm:text-base"></p>
+          <p id="mode-modal-desc" class="text-xs sm:text-sm text-slate-600 mt-1">
+            Select how random questions are generated for this session (60 seconds per question):
+          </p>
+        </div>
+
+        <!-- Option 1: This Part Only -->
+        <button
+          onclick="initiateQuizWithMode('single')"
+          class="w-full text-start p-4 rounded-xl border-2 border-slate-200 hover:border-qiyas-teal hover:bg-teal-50/40 transition group flex items-start gap-3.5"
+        >
+          <div class="w-10 h-10 rounded-xl bg-teal-100 text-qiyas-teal flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-qiyas-teal group-hover:text-white transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <div id="mode-single-title" class="font-bold text-slate-900 text-sm sm:text-base">
+              Practice This Part Only
+            </div>
+            <p id="mode-single-sub" class="text-xs text-slate-600 mt-1 leading-relaxed">
+              Generates random questions exclusively from this chapter to test your mastery.
+            </p>
+          </div>
+        </button>
+
+        <!-- Option 2: Revised / Cumulative Version -->
+        <button
+          id="btn-mode-cumulative"
+          onclick="initiateQuizWithMode('cumulative')"
+          class="w-full text-start p-4 rounded-xl border-2 border-slate-200 hover:border-amber-500 hover:bg-amber-50/40 transition group flex items-start gap-3.5"
+        >
+          <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-amber-600 group-hover:text-white transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <div id="mode-cum-title" class="font-bold text-slate-900 text-sm sm:text-base">
+              Cumulative Revision (This Part + All Previous Parts)
+            </div>
+            <p id="mode-cum-sub" class="text-xs text-slate-600 mt-1 leading-relaxed">
+              Generates random questions pooled from Chapter 1 up to this chapter to reinforce retention.
+            </p>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 2: 5-DIGIT ACCESS CODE GATE (AFTER 1ST FREE QUIZ)               -->
+  <!-- ===================================================================== -->
+  <div id="code-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-view-enter">
+      <div class="bg-qiyas-navy text-white px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <h3 id="code-modal-title" class="font-bold text-base sm:text-lg">Enter 5-Digit Access Code</h3>
+        </div>
+        <button onclick="closeCodeModal()" class="text-slate-300 hover:text-white p-1 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form onsubmit="submitAccessCode(event)" class="p-6 space-y-5">
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs sm:text-sm text-amber-900 leading-relaxed">
+          <p id="code-modal-desc">
+            You have used your 1st free practice quiz! Enter the 5-digit access code once to unlock all chapters and quizzes.
+          </p>
+        </div>
+
+        <div>
+          <label id="code-input-label" for="access-code-input" class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">
+            5-Digit Student Access Code
+          </label>
+          <input
+            id="access-code-input"
+            type="text"
+            inputmode="numeric"
+            maxlength="5"
+            pattern="[0-9]{5}"
+            placeholder="• • • • •"
+            autocomplete="off"
+            dir="ltr"
+            class="w-full text-center text-2xl sm:text-3xl font-extrabold tracking-[0.5em] py-3.5 px-4 rounded-xl border-2 border-slate-300 focus:border-qiyas-teal focus:ring-4 focus:ring-teal-500/15 outline-none transition bg-slate-50"
+            required
+          />
+          <p id="code-error-msg" class="hidden text-rose-600 text-xs font-semibold mt-2 text-center">
+            Invalid code! Please check the 5-digit access code and try again.
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          id="code-submit-btn"
+          class="w-full py-3.5 px-5 rounded-xl bg-qiyas-teal hover:bg-qiyas-tealHover text-white font-bold text-sm sm:text-base shadow-md transition"
+        >
+          Verify Code & Start Quiz
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 3: TEACHER ACCESS CODE PREVIEW / UPDATE MODAL                   -->
+  <!-- ===================================================================== -->
+  <div id="teacher-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/65 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-view-enter">
+      <div class="bg-slate-800 text-white px-6 py-4 flex items-center justify-between">
+        <h3 id="teacher-modal-title" class="font-bold text-base">Student Access Code Settings (Teacher)</h3>
+        <button onclick="closeTeacherModal()" class="text-slate-300 hover:text-white p-1 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-6 space-y-4">
+        <p id="teacher-modal-desc" class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+          The current student 5-digit access code is <strong class="text-qiyas-navy font-mono text-base" id="current-code-display">11223</strong>. You can update it here to test the access gate during this session.
+        </p>
+        <div class="space-y-2">
+          <label id="teacher-input-label" class="block text-xs font-bold text-slate-700">Set new 5-digit code:</label>
+          <div class="flex gap-2" dir="ltr">
+            <input
+              id="teacher-new-code"
+              type="text"
+              inputmode="numeric"
+              maxlength="5"
+              placeholder="11223"
+              class="flex-1 text-center font-mono text-lg font-bold py-2.5 px-3 rounded-xl border border-slate-300 focus:border-qiyas-teal outline-none"
+            />
+            <button
+              onclick="updateTeacherCode()"
+              id="teacher-save-btn"
+              class="px-4 py-2.5 rounded-xl bg-qiyas-navy hover:bg-qiyas-navyLight text-white font-bold text-xs sm:text-sm transition"
+            >
+              Update Code
+            </button>
+          </div>
+        </div>
+        <div class="pt-2 border-t border-slate-200 flex items-center justify-between">
+          <button
+            onclick="resetTrialLock()"
+            id="teacher-reset-btn"
+            class="text-xs font-semibold text-amber-700 hover:underline"
+          >
+            Re-lock Trial for Testing
+          </button>
+          <button
+            onclick="closeTeacherModal()"
+            class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 4: QIYAS EXAM REVIEW NAVIGATOR GRID                             -->
+  <!-- ===================================================================== -->
+  <div id="review-grid-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/65 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden animate-view-enter">
+      <div class="bg-qiyas-navy text-white px-6 py-4 flex items-center justify-between">
+        <h3 id="review-modal-title" class="font-bold text-base sm:text-lg">Question Status Summary</h3>
+        <button onclick="closeReviewGridModal()" class="text-slate-300 hover:text-white p-1 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-5">
+        <!-- Status Counters -->
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+            <div id="stat-answered-count" class="text-xl font-extrabold text-emerald-700">0</div>
+            <div id="stat-answered-lbl" class="text-xs font-semibold text-emerald-800">Answered</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-100 border border-slate-200">
+            <div id="stat-unanswered-count" class="text-xl font-extrabold text-slate-700">0</div>
+            <div id="stat-unanswered-lbl" class="text-xs font-semibold text-slate-600">Unanswered</div>
+          </div>
+          <div class="p-3 rounded-xl bg-amber-50 border border-amber-200">
+            <div id="stat-flagged-count" class="text-xl font-extrabold text-amber-600">0</div>
+            <div id="stat-flagged-lbl" class="text-xs font-semibold text-amber-800">Flagged</div>
+          </div>
+        </div>
+
+        <!-- Question Grid -->
+        <div id="review-grid-buttons" class="grid grid-cols-5 gap-2.5">
+          <!-- Populated dynamically -->
+        </div>
+
+        <div class="bg-rose-50 border border-rose-200 rounded-xl p-3.5 text-xs text-rose-800">
+          <p id="end-exam-warn">
+            Notice: Ending the exam will submit your answers and display your score report.
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 pt-1">
+          <button
+            onclick="closeReviewGridModal()"
+            id="review-continue-btn"
+            class="flex-1 py-3 px-4 rounded-xl border-2 border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-sm transition"
+          >
+            Return to Questions
+          </button>
+          <button
+            onclick="finishExam()"
+            id="review-finish-btn"
+            class="flex-1 py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow transition"
+          >
+            End Exam & View Score
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 5: QIYAS PHYSICS CONSTANTS & FORMULA SHEET                      -->
+  <!-- ===================================================================== -->
+  <div id="constants-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/65 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-view-enter">
+      <div class="bg-qiyas-teal text-white px-6 py-4 flex items-center justify-between">
+        <h3 id="constants-modal-title" class="font-bold text-base">Physics Constants Reference</h3>
+        <button onclick="closeConstantsModal()" class="text-teal-100 hover:text-white p-1 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-6 space-y-3 text-sm" dir="ltr">
+        <div class="flex justify-between py-2 border-b border-slate-100">
+          <span class="font-semibold text-slate-700">Acceleration due to gravity (g)</span>
+          <span class="font-mono font-bold text-qiyas-navy">9.8 m/s<sup>2</sup> (≈ 10 m/s<sup>2</sup>)</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-slate-100">
+          <span class="font-semibold text-slate-700">Speed of light in vacuum (c)</span>
+          <span class="font-mono font-bold text-qiyas-navy">3.00 × 10<sup>8</sup> m/s</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-slate-100">
+          <span class="font-semibold text-slate-700">Planck's constant (h)</span>
+          <span class="font-mono font-bold text-qiyas-navy">6.626 × 10<sup>-34</sup> J·s</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-slate-100">
+          <span class="font-semibold text-slate-700">Elementary charge (e)</span>
+          <span class="font-mono font-bold text-qiyas-navy">1.60 × 10<sup>-19</sup> C</span>
+        </div>
+        <div class="flex justify-between py-2">
+          <span class="font-semibold text-slate-700">Coulomb's constant (K)</span>
+          <span class="font-mono font-bold text-qiyas-navy">9.0 × 10<sup>9</sup> N·m<sup>2</sup>/C<sup>2</sup></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TOAST NOTIFICATION BANNER (NO ALERT() USED ANYWHERE)                  -->
+  <!-- ===================================================================== -->
+  <div id="toast-box" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden">
+    <div id="toast-msg" class="bg-slate-900 text-white text-xs sm:text-sm font-semibold px-5 py-3 rounded-xl shadow-xl border border-slate-700"></div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- JAVASCRIPT APPLICATION LOGIC & QUESTION BANK                          -->
+  <!-- ===================================================================== -->
+  <script>
+    /**
+     * =========================================================================
+     * CONFIGURATION & ACCESS CODE SETTINGS
+     * =========================================================================
+     * Update `accessCode` below whenever you want to change the 5-digit student code.
+     */
+    const APP_CONFIG = {
+      accessCode: '11223',              // Default 5-digit access code
+      questionsPerPartQuiz: 10,         // Up to 10 random questions for Parts 1–10
+      questionsPerComprehensive: 20,    // 20 random questions for Part 11
+      secondsPerQuestion: 60            // 60 seconds timer per question
+    };
+
+    /**
+     * =========================================================================
+     * PHYSICS 11 PARTS METADATA
+     * =========================================================================
+     */
+    const PHYSICS_PARTS = [
+      {
+        id: 1,
+        titleEn: "Chapter 1: The Science of Physics",
+        subEn: "Scientific Method, Hypotheses, Laws & Theories",
+        titleAr: "القسم 1: علم الفيزياء",
+        subAr: "الطريقة العلمية، الفرضيات، القوانين والنظريات"
+      },
+      {
+        id: 2,
+        titleEn: "Chapter 2: Mechanics",
+        subEn: "Motion, Forces, Gravity, Torque & Equilibrium",
+        titleAr: "القسم 2: الميكانيكا",
+        subAr: "الحركة، القوى، الجاذبية، العزم والاتزان"
+      },
+      {
+        id: 3,
+        titleEn: "Chapter 3: Energy, Work & Momentum",
+        subEn: "Collisions, Momentum, Work, Power & Conservation",
+        titleAr: "القسم 3: الطاقة والشغل والزخم",
+        subAr: "التصادمات، الزخم، الشغل، القدرة وحفظ الطاقة"
+      },
+      {
+        id: 4,
+        titleEn: "Chapter 4: States of Matter & Thermal Physics",
+        subEn: "Heat Transfer, Fluids, Pascal's & Bernoulli's Principles",
+        titleAr: "القسم 4: حالات المادة والفيزياء الحرارية",
+        subAr: "انتقال الحرارة، الموائع، مبدأ باسكال وبرنولي"
+      },
+      {
+        id: 5,
+        titleEn: "Chapter 5: Waves & Sound",
+        subEn: "Harmonic Motion, Wave Speed, Doppler Effect & Resonance",
+        titleAr: "القسم 5: الموجات والصوت",
+        subAr: "الحركة التوافقية، سرعة الموجة، تأثير دوبلر والرنين"
+      },
+      {
+        id: 6,
+        titleEn: "Chapter 6: Light & Optics",
+        subEn: "Reflection, Mirrors, Refraction, Lenses & Wave Nature of Light",
+        titleAr: "القسم 6: الضوء والبصريات",
+        subAr: "الانعكاس، المرايا، الانكسار، العدسات والطبيعة الموجية للضوء"
+      },
+      {
+        id: 7,
+        titleEn: "Chapter 7: Electricity & Electric Circuits",
+        subEn: "Electrostatics, Coulomb's Law, Electric Fields, Ohm's Law & Circuits",
+        titleAr: "القسم 7: الكهرباء والدوائر الكهربائية",
+        subAr: "الكهرباء الساكنة، قانون كولوم، المجالات الكهربائية وقانون أوم"
+      },
+      {
+        id: 8,
+        titleEn: "Chapter 8: Magnetism & Electromagnetism",
+        subEn: "Magnetic Forces, Induction, Generators & Transformers",
+        titleAr: "القسم 8: المغناطيسية والكهرومغناطيسية",
+        subAr: "القوى المغناطيسية، الحث الكهرومغناطيسي، المولدات والمحولات"
+      },
+      {
+        id: 9,
+        titleEn: "Chapter 9: Modern Physics",
+        subEn: "Quantum Energy, Photoelectric Effect, Bohr Model & Semiconductors",
+        titleAr: "القسم 9: الفيزياء الحديثة",
+        subAr: "تكميم الطاقة، التأثير الكهروضوئي، نموذج بور وأشباه الموصلات"
+      },
+      {
+        id: 10,
+        titleEn: "Chapter 10: Nuclear Physics",
+        subEn: "Nucleus Structure, Isotopes, Radioactive Decay & Elementary Particles",
+        titleAr: "القسم 10: الفيزياء النووية",
+        subAr: "تركيب النواة، النظائر، الاضمحلال الإشعاعي والجسيمات الأولية"
+      },
+      {
+        id: 11,
+        titleEn: "Chapter 11: Comprehensive Tests for SAAT Preparation",
+        subEn: "General randomized exam covering all previous Physics chapters (1–10)",
+        titleAr: "القسم 11: اختبارات شاملة للتحضير لاختبار التحصيلي",
+        subAr: "اختبار عشوائي شامل يغطي جميع أقسام الفيزياء السابقة (1–10)",
+        isComprehensive: true
+      }
+    ];
+
+    /**
+     * =========================================================================
+     * BILINGUAL QUESTION BANK (50 TRANSLATED SAAT PHYSICS QUESTIONS)
+     * =========================================================================
+     * Ready to expand up to 50+ questions per chapter as you send more batches!
+     */
+    const QUESTION_BANK = [
+      // ==================== CHAPTER 1: THE SCIENCE OF PHYSICS ====================
+      {
+        id: "p1_q1",
+        part: 1,
+        qAr: "فرع من فروع العلم يُعنى بدراسة الطاقة والمادة وكيفية ارتباطهما ..",
+        qEn: "A branch of science concerned with studying energy, matter, and how they are related is ..",
+        optionsAr: ["الكيمياء", "الأحياء", "الفيزياء", "الجيولوجيا"],
+        optionsEn: ["Chemistry", "Biology", "Physics", "Geology"],
+        correct: 2,
+        expAr: "الفيزياء هي العلم الذي يدرس المادة والطاقة والعلاقة بينهما.",
+        expEn: "Physics is the branch of science that studies matter, energy, and their interactions."
+      },
+      {
+        id: "p1_q2",
+        part: 1,
+        qAr: "أولى خطوات الطريقة العلمية ..",
+        qEn: "The first step of the scientific method is ..",
+        optionsAr: ["الفرضية", "التجربة", "طرح الأسئلة", "الاستنتاج"],
+        optionsEn: ["Forming a hypothesis", "Experimentation", "Asking questions", "Drawing a conclusion"],
+        correct: 2,
+        expAr: "تبدأ الطريقة العلمية بالملاحظة وطرح الأسئلة حول الظواهر الطبيعية.",
+        expEn: "The scientific method begins with observing phenomena and asking questions."
+      },
+      {
+        id: "p1_q3",
+        part: 1,
+        qAr: "تفسير قابل للاختبار ..",
+        qEn: "A testable explanation for an observation is called a ..",
+        optionsAr: ["الفرضية", "القانون", "المبدأ", "النظرية"],
+        optionsEn: ["Hypothesis", "Law", "Principle", "Theory"],
+        correct: 0,
+        expAr: "الفرضية هي تخمين علمي أو تفسير مبدئي قابل للاختبار عبر التجربة.",
+        expEn: "A hypothesis is a testable educated explanation that can be verified through experimentation."
+      },
+      {
+        id: "p1_q4",
+        part: 1,
+        qAr: "لكي نثبت صحة الفرضية نحتاج إلى ..",
+        qEn: "To test and verify the validity of a hypothesis, we need ..",
+        optionsAr: ["التجريب", "الملاحظة", "التحليل", "الاستنتاج"],
+        optionsEn: ["Experimentation", "Observation", "Analysis", "Conclusion"],
+        correct: 0,
+        expAr: "يتم اختبار صحة الفرضية عن طريق تصميم وإجراء التجارب العلمية.",
+        expEn: "A hypothesis is tested and validated by conducting controlled experiments."
+      },
+      {
+        id: "p1_q5",
+        part: 1,
+        qAr: "«الطاقة لا تفنى ولا تستحدث من العدم»، تُمثّل ..",
+        qEn: "“Energy can neither be created nor destroyed” represents a scientific ..",
+        optionsAr: ["نظرية", "قانوناً", "استنتاجاً", "فرضية"],
+        optionsEn: ["Theory", "Law", "Conclusion", "Hypothesis"],
+        correct: 1,
+        expAr: "القانون العلمي قاعدة طبيعية تجمع مشاهدات مترابطة لوصف ظاهرة طبيعية متكررة دون تفسير سببها.",
+        expEn: "A scientific law is a rule of nature that summarizes related observations to describe a natural phenomenon."
+      },
+      {
+        id: "p1_q6",
+        part: 1,
+        qAr: "أي صيغ العلاقات التالية يكافئ العلاقة <span dir='ltr'>T = (V · S) / m<sup>2</sup></span> ؟",
+        qEn: "Which of the following formulas is equivalent to the relation <span dir='ltr'>T = (V · S) / m<sup>2</sup></span> ?",
+        optionsAr: [
+          "<span dir='ltr'>m = √(T / (V · S))</span>",
+          "<span dir='ltr'>m<sup>2</sup> = T · V · S</span>",
+          "<span dir='ltr'>m<sup>2</sup> = T / (V · S)</span>",
+          "<span dir='ltr'>m = √((V · S) / T)</span>"
+        ],
+        optionsEn: [
+          "<span dir='ltr'>m = √(T / (V · S))</span>",
+          "<span dir='ltr'>m<sup>2</sup> = T · V · S</span>",
+          "<span dir='ltr'>m<sup>2</sup> = T / (V · S)</span>",
+          "<span dir='ltr'>m = √((V · S) / T)</span>"
+        ],
+        correct: 3,
+        expAr: "بضرب الطرفين في m² والقسمة على T نحصل على m² = (V · S) / T، وبأخذ الجذر التربيعي للطرفين: m = √((V · S) / T).",
+        expEn: "Multiplying both sides by m² and dividing by T gives m² = (V · S) / T; taking the square root yields m = √((V · S) / T)."
+      },
+      {
+        id: "p1_q7",
+        part: 1,
+        qAr: "تفسير ظاهرة طبيعية بناءً على مشاهدات واستقصاءات مع مرور الزمن ..",
+        qEn: "An explanation of a natural phenomenon supported by many observations and investigations over time is a ..",
+        optionsAr: ["النظرية العلمية", "الفرضية", "الاستنتاج", "القانون العلمي"],
+        optionsEn: ["Scientific theory", "Hypothesis", "Conclusion", "Scientific law"],
+        correct: 0,
+        expAr: "النظرية العلمية هي إطار يجمع عناصر البناء العلمي وتفسر الظواهر بناءً على مشاهدات واستقصاءات متعددة مع مرور الزمن.",
+        expEn: "A scientific theory is a well-substantiated explanation of natural phenomena based on repeated observations and investigations over time."
+      },
+      {
+        id: "p1_q8",
+        part: 1,
+        qAr: "الطريقة الشائعة لاختبار ضبط جهاز تتم عن طريق ..",
+        qEn: "The common method used to test the calibration and precision of a measuring device is ..",
+        optionsAr: ["زاوية النظر", "معايرة النقطة", "معايرة النقطتين", "تصفير الجهاز"],
+        optionsEn: ["Viewing angle", "Single-point calibration", "Two-point calibration", "Zeroing the device"],
+        correct: 2,
+        expAr: "يتم اختبار ضبط الجهاز ودقته عن طريق معايرة النقطتين (معايرة الصفر ثم معايرة القيمة العظمى).",
+        expEn: "Device calibration is commonly verified using two-point calibration (checking zero and a known standard value)."
+      },
+      {
+        id: "p1_q9",
+        part: 1,
+        qAr: "أي الكميات التالية كمية متجهة؟",
+        qEn: "Which of the following is a vector quantity?",
+        optionsAr: [
+          "دفع عربة بقوة مقدارها <span dir='ltr'>70 N</span>",
+          "سيارة تسير بسرعة <span dir='ltr'>30 km/h</span>",
+          "سباح قطع مسافة قدرها <span dir='ltr'>800 m</span>",
+          "سقوط حجر رأسياً للأسفل بسرعة <span dir='ltr'>9 m/s</span>"
+        ],
+        optionsEn: [
+          "Pushing a cart with a force of 70 N",
+          "A car moving at a speed of 30 km/h",
+          "A swimmer covering a distance of 800 m",
+          "A stone falling vertically downward at 9 m/s"
+        ],
+        correct: 3,
+        expAr: "الكمية المتجهة تُحدد بالمقدار والاتجاه معاً، وسقوط الحجر بسرعة 9 m/s (مقدار) رأسياً للأسفل (اتجاه) يمثل كمية متجهة.",
+        expEn: "A vector quantity requires both magnitude and direction: 9 m/s (magnitude) vertically downward (direction)."
+      },
+      {
+        id: "p1_q10",
+        part: 1,
+        qAr: "أي الكميات التالية كمية قياسية؟",
+        qEn: "Which of the following is a scalar quantity?",
+        optionsAr: ["الجهد الكهربائي", "التسارع اللحظي", "شدة المجال الكهربائي", "شدة المجال المغناطيسي"],
+        optionsEn: ["Electric potential", "Instantaneous acceleration", "Electric field strength", "Magnetic field strength"],
+        correct: 0,
+        expAr: "الجهد الكهربائي يُحدد بالمقدار فقط دون اتجاه لذا فهو كمية قياسية، بينما التسارع والمجالان الكهربائي والمغناطيسي كميات متجهة.",
+        expEn: "Electric potential has magnitude only (scalar), whereas acceleration and electric/magnetic fields are vectors."
+      },
+      {
+        id: "p1_q11",
+        part: 1,
+        qAr: "الكميات التالية كميات قياسية عدا ..",
+        qEn: "All of the following are scalar quantities EXCEPT ..",
+        optionsAr: ["الزمن", "القوة", "درجة الحرارة", "الحجم"],
+        optionsEn: ["Time", "Force", "Temperature", "Volume"],
+        correct: 1,
+        expAr: "الزمن ودرجة الحرارة والحجم كميات قياسية، أما القوة فهي كمية متجهة تحتاج لتحديد مقدارها واتجاهها.",
+        expEn: "Time, temperature, and volume are scalars, whereas force is a vector quantity having both magnitude and direction."
+      },
+      {
+        id: "p1_q12",
+        part: 1,
+        qAr: "وحدة الطول في النظام الدولي للوحدات (<span dir='ltr'>SI</span>) هي ..",
+        qEn: "The base unit of length in the International System of Units (SI) is the ..",
+        optionsAr: [
+          "<span dir='ltr'>cm</span> سنتيمتر",
+          "<span dir='ltr'>m</span> متر",
+          "<span dir='ltr'>km</span> كيلومتر",
+          "<span dir='ltr'>mm</span> مليمتر"
+        ],
+        optionsEn: [
+          "Centimeter (cm)",
+          "Meter (m)",
+          "Kilometer (km)",
+          "Millimeter (mm)"
+        ],
+        correct: 1,
+        expAr: "الوحدة الأساسية للطول في النظام الدولي للوحدات (SI) هي المتر (m).",
+        expEn: "The standard SI base unit for length is the meter (m)."
+      },
+      {
+        id: "p1_q13",
+        part: 1,
+        qAr: "أي الكميات التالية كمية فيزيائية مشتقة؟",
+        qEn: "Which of the following is a derived physical quantity?",
+        optionsAr: ["شدة التيار", "فرق الجهد", "الزمن", "شدة الإضاءة"],
+        optionsEn: ["Electric current", "Potential difference (voltage)", "Time", "Luminous intensity"],
+        correct: 1,
+        expAr: "شدة التيار والزمن وشدة الإضاءة من الكميات الأساسية السبع، بينما فرق الجهد (V = W / q) كمية مشتقة.",
+        expEn: "Electric current, time, and luminous intensity are SI base quantities, whereas potential difference is a derived quantity."
+      },
+      {
+        id: "p1_q14",
+        part: 1,
+        qAr: "إذا كان الطول كمية أساسية فإن المساحة كمية ..",
+        qEn: "If length is a fundamental (base) quantity, then area is a ..",
+        optionsAr: ["أساسية", "أصلية", "مشتقة", "محايدة"],
+        optionsEn: ["Fundamental quantity", "Primary quantity", "Derived quantity", "Neutral quantity"],
+        correct: 2,
+        expAr: "المساحة (A = L × W) تُشتق من حاصل ضرب كميتين أساسيتين للطول، لذا فهي كمية مشتقة.",
+        expEn: "Area (length × width) is obtained by combining base length quantities, making it a derived quantity."
+      },
+      {
+        id: "p1_q15",
+        part: 1,
+        qAr: "شرب أحمد <span dir='ltr'>3</span> ديسيلتر حليب، هذا يعني أن الكمية التي شربها باللتر ..",
+        qEn: "Ahmed drank 3 deciliters (dL) of milk. How much is this quantity in liters (L)?",
+        optionsAr: ["3", "0.3", "0.003", "0.0003"],
+        optionsEn: ["3", "0.3", "0.003", "0.0003"],
+        correct: 1,
+        expAr: "البادئة ديسي (d) تساوي 10⁻¹ = 0.1، إذن 3 dL = 3 × 0.1 = 0.3 L.",
+        expEn: "The prefix deci (d) equals 10⁻¹ = 0.1, so 3 dL = 3 × 0.1 = 0.3 L."
+      },
+      {
+        id: "p1_q16",
+        part: 1,
+        qAr: "<span dir='ltr'>6 μm</span> تساوي بوحدة المتر ..",
+        qEn: "<span dir='ltr'>6 μm</span> expressed in meters (m) equals ..",
+        optionsAr: [
+          "<span dir='ltr'>6 × 10<sup>6</sup></span>",
+          "<span dir='ltr'>6 × 10<sup>-6</sup></span>",
+          "<span dir='ltr'>6 × 10<sup>9</sup></span>",
+          "<span dir='ltr'>6 × 10<sup>-9</sup></span>"
+        ],
+        optionsEn: [
+          "<span dir='ltr'>6 × 10<sup>6</sup></span>",
+          "<span dir='ltr'>6 × 10<sup>-6</sup></span>",
+          "<span dir='ltr'>6 × 10<sup>9</sup></span>",
+          "<span dir='ltr'>6 × 10<sup>-9</sup></span>"
+        ],
+        correct: 1,
+        expAr: "البادئة ميكرو (μ) تساوي 10⁻⁶، لذا 6 μm = 6 × 10⁻⁶ m.",
+        expEn: "The prefix micro (μ) represents 10⁻⁶, so 6 μm = 6 × 10⁻⁶ m."
+      },
+      {
+        id: "p1_q17",
+        part: 1,
+        qAr: "<span dir='ltr'>0.003 F</span> تُعادل ..",
+        qEn: "<span dir='ltr'>0.003 F</span> is equivalent to ..",
+        optionsAr: [
+          "<span dir='ltr'>3 dF</span>",
+          "<span dir='ltr'>3 mF</span>",
+          "<span dir='ltr'>3 kF</span>",
+          "<span dir='ltr'>3 MF</span>"
+        ],
+        optionsEn: [
+          "<span dir='ltr'>3 dF</span>",
+          "<span dir='ltr'>3 mF</span>",
+          "<span dir='ltr'>3 kF</span>",
+          "<span dir='ltr'>3 MF</span>"
+        ],
+        correct: 1,
+        expAr: "0.003 F = 3 × 10⁻³ F، وبما أن البادئة مللي (m) تساوي 10⁻³ فإنها تعادل 3 mF.",
+        expEn: "0.003 F = 3 × 10⁻³ F, and since the prefix milli (m) equals 10⁻³, it equals 3 mF."
+      },
+
+      // ==================== CHAPTER 2: MECHANICS ====================
+      {
+        id: "p2_q1",
+        part: 2,
+        qAr: "جسم يتحرك في مسار دائري نصف قطره <span dir='ltr'>3 m</span>، فعندما يعود إلى نقطة البداية نفسها فإن الإزاحة بوحدة <span dir='ltr'>m</span> تساوي ..",
+        qEn: "An object moves along a circular path of radius 3 m. When it returns to the exact starting point, its displacement in meters (m) equals ..",
+        optionsAr: ["0", "3", "6", "9.42"],
+        optionsEn: ["0", "3", "6", "9.42"],
+        correct: 0,
+        expAr: "الإزاحة هي التغير في الموقع (الموقع النهائي ناقص الابتدائي)؛ وبما أنه عاد لنقطة البداية فالإزاحة = 0.",
+        expEn: "Displacement is the net change in position. Returning to the starting point means displacement = 0 m."
+      },
+      {
+        id: "p2_q2",
+        part: 2,
+        qAr: "يُعد الفهد أسرع الثدييات البرية إذ تبلغ سرعته <span dir='ltr'>110 km/h</span>، وهذه السرعة تُصنّف على أنها سرعة ..",
+        qEn: "The cheetah is the fastest land mammal, reaching a speed of 110 km/h. Since no direction is specified, this is classified as ..",
+        optionsAr: ["متجهة متوسطة", "متجهة لحظية", "متوسطة", "لحظية"],
+        optionsEn: ["Average velocity", "Instantaneous velocity", "Average speed", "Instantaneous speed"],
+        correct: 2,
+        expAr: "القيمة معطاة كمقدار فقط دون تحديد الاتجاه، لذا فهي سرعة قياسية متوسطة.",
+        expEn: "Only magnitude is given without a direction, making it average scalar speed."
+      },
+      {
+        id: "p2_q3",
+        part: 2,
+        qAr: "التسارع هو ..",
+        qEn: "Acceleration is defined as ..",
+        optionsAr: [
+          "التغير في إزاحة الجسم مقسوماً على الزمن",
+          "التغير الذي يحدث لموقع الجسم في اتجاه معين",
+          "التغير في الموقع مقسوماً على مقدار زمن التغير",
+          "التغير في السرعة المتجهة مقسوماً على مقدار زمن التغير"
+        ],
+        optionsEn: [
+          "The change in displacement divided by time",
+          "The change in an object's position in a specific direction",
+          "The change in position divided by the time interval",
+          "The change in velocity divided by the time interval"
+        ],
+        correct: 3,
+        expAr: "التسارع a = Δv / Δt أي التغير في السرعة المتجهة مقسوماً على زمن التغير.",
+        expEn: "Acceleration (a = Δv / Δt) is the rate of change of velocity over a time interval."
+      },
+      {
+        id: "p2_q4",
+        part: 2,
+        qAr: "إذا تغيرت سرعة جسم من <span dir='ltr'>4 m/s</span> إلى <span dir='ltr'>7.5 m/s</span> خلال ثانية واحدة؛ فإن تسارعه بوحدة <span dir='ltr'>m/s<sup>2</sup></span> يساوي ..",
+        qEn: "If an object's velocity changes from 4 m/s to 7.5 m/s in 1 second, its acceleration in m/s<sup>2</sup> is ..",
+        optionsAr: ["-11.5", "-3.5", "3.5", "11.5"],
+        optionsEn: ["-11.5", "-3.5", "3.5", "11.5"],
+        correct: 2,
+        expAr: "a = (v_f - v_i) / t = (7.5 - 4) / 1 = 3.5 m/s².",
+        expEn: "a = (v_f - v_i) / t = (7.5 - 4) / 1 = 3.5 m/s²."
+      },
+      {
+        id: "p2_q5",
+        part: 2,
+        qAr: "تسارع جسم تغيرت سرعته بمعدل <span dir='ltr'>30 m/s</span> خلال زمن <span dir='ltr'>2 s</span> ..",
+        qEn: "What is the acceleration of an object whose velocity changes by 30 m/s during a time interval of 2 s?",
+        optionsAr: ["60 m/s<sup>2</sup>", "30 m/s<sup>2</sup>", "15 m/s<sup>2</sup>", "5 m/s<sup>2</sup>"],
+        optionsEn: ["60 m/s<sup>2</sup>", "30 m/s<sup>2</sup>", "15 m/s<sup>2</sup>", "5 m/s<sup>2</sup>"],
+        correct: 2,
+        expAr: "a = Δv / Δt = 30 / 2 = 15 m/s².",
+        expEn: "a = Δv / Δt = 30 / 2 = 15 m/s²."
+      },
+
+      // ==================== CHAPTER 3: ENERGY, WORK & MOMENTUM ====================
+      {
+        id: "p3_q1",
+        part: 3,
+        qAr: "النظام الذي لا يكتسب كتلة ولا يفقدها يُسمى النظام ..",
+        qEn: "A system that neither gains nor loses mass is called a(n) ..",
+        optionsAr: ["المفتوح", "المغلق", "المرن", "غير المرن"],
+        optionsEn: ["Open system", "Closed system", "Elastic system", "Inelastic system"],
+        correct: 1,
+        expAr: "النظام المغلق هو النظام الذي لا يكتسب كتلة ولا يفقدها.",
+        expEn: "A closed system does not exchange mass with its surroundings."
+      },
+      {
+        id: "p3_q2",
+        part: 3,
+        qAr: "إذا تصادمت سيارتان فالتحمتا معاً، وكانت سرعتاهما قبل التصادم <span dir='ltr'>4.7 m/s</span> و <span dir='ltr'>5 m/s</span>، وأصبحت سرعتاهما بعد التصادم <span dir='ltr'>11.9 m/s</span>؛ فإن نوع التصادم ..",
+        qEn: "Two cars collide and stick together. Their speeds before the collision were 4.7 m/s and 5 m/s, and their combined speed after the collision became 11.9 m/s. What type of collision is this?",
+        optionsAr: ["شبه مرن", "مرن", "فوق مرن", "عديم المرونة"],
+        optionsEn: ["Semi-elastic", "Elastic", "Super-elastic (explosive)", "Inelastic"],
+        correct: 2,
+        expAr: "بما أن الطاقة الحركية والسرعة بعد التصادم زادت عن ما قبل التصادم، فالتصادم فوق مرن (انفجاري).",
+        expEn: "Because kinetic energy increased after the collision, it is classified as a super-elastic collision."
+      },
+      {
+        id: "p3_q3",
+        part: 3,
+        qAr: "المساحة تحت منحنى (القوة - الزمن) تساوي ..",
+        qEn: "The area under a Force–Time (F–t) graph equals ..",
+        optionsAr: ["السرعة", "التسارع", "الزخم", "الدفع"],
+        optionsEn: ["Velocity", "Acceleration", "Momentum", "Impulse"],
+        correct: 3,
+        expAr: "الدفع I = F × Δt ويمثل هندسياً المساحة تحت منحنى (القوة - الزمن).",
+        expEn: "Impulse (I = F · Δt) is represented by the area under the Force vs. Time curve."
+      },
+      {
+        id: "p3_q4",
+        part: 3,
+        qAr: "دراجة هوائية كتلتها <span dir='ltr'>50 kg</span> وزخمها <span dir='ltr'>250 kg·m/s</span>، إن سرعتها تساوي ..",
+        qEn: "A bicycle has a mass of 50 kg and a momentum of 250 kg·m/s. What is its speed?",
+        optionsAr: ["0.25 m/s", "25 m/s", "5 m/s", "50 m/s"],
+        optionsEn: ["0.25 m/s", "25 m/s", "5 m/s", "50 m/s"],
+        correct: 2,
+        expAr: "الزخم p = m × v ⟹ v = p / m = 250 / 50 = 5 m/s.",
+        expEn: "Momentum p = m · v ⟹ v = p / m = 250 / 50 = 5 m/s."
+      },
+      {
+        id: "p3_q5",
+        part: 3,
+        qAr: "إذا تضاعفت سرعة جسم فإن زخمه ..",
+        qEn: "If the speed of an object is doubled, its momentum ..",
+        optionsAr: ["يتضاعف", "يزداد أربع مرات", "ينقص للنصف", "ينقص للربع"],
+        optionsEn: ["Doubles", "Quadruples", "Decreases by half", "Decreases to a quarter"],
+        correct: 0,
+        expAr: "الزخم يتناسب طردياً مع السرعة (p = m·v)، فإذا تضاعفت السرعة يتضاعف الزخم.",
+        expEn: "Momentum is directly proportional to velocity (p = m·v); doubling speed doubles momentum."
+      },
+
+      // ==================== CHAPTER 4: STATES OF MATTER & THERMAL PHYSICS ====================
+      {
+        id: "p4_q1",
+        part: 4,
+        qAr: "تعتمد درجة حرارة الجسم على ..",
+        qEn: "The temperature of an object depends on ..",
+        optionsAr: [
+          "عدد ذرات الجسم",
+          "عدد الجزيئات في الجسم",
+          "متوسط الطاقة الحركية للجسم",
+          "متوسط الطاقة الحركية لجزيئات الجسم"
+        ],
+        optionsEn: [
+          "The number of atoms in the object",
+          "The number of molecules in the object",
+          "The average kinetic energy of the whole object",
+          "The average kinetic energy of the object's molecules"
+        ],
+        correct: 3,
+        expAr: "درجة الحرارة مقياس لمتوسط الطاقة الحركية لجزيئات الجسم.",
+        expEn: "Temperature is a measure of the average kinetic energy of the particles/molecules in a substance."
+      },
+      {
+        id: "p4_q2",
+        part: 4,
+        qAr: "الحالة التي يصبح عندها معدلا تدفق الطاقة متساويين بين جسمين ..",
+        qEn: "The state in which the rate of energy transfer between two objects becomes equal is called ..",
+        optionsAr: ["الطاقة الحرارية", "الاتزان الحراري", "الانحدار الحراري", "الحرارة النوعية"],
+        optionsEn: ["Thermal energy", "Thermal equilibrium", "Thermal gradient", "Specific heat"],
+        correct: 1,
+        expAr: "الاتزان الحراري يحدث عندما تتساوى درجتا حرارة الجسمين ويتساوى معدل تدفق الطاقة بينهما.",
+        expEn: "Thermal equilibrium occurs when two objects reach the same temperature and net heat flow becomes zero."
+      },
+      {
+        id: "p4_q3",
+        part: 4,
+        qAr: "التوصيل هو أحد طرق انتقال الحرارة، ويكون أسرع في ..",
+        qEn: "Conduction is a mode of heat transfer that occurs fastest in ..",
+        optionsAr: ["السوائل", "الفراغ", "الغازات", "المعادن"],
+        optionsEn: ["Liquids", "Vacuum", "Gases", "Metals"],
+        correct: 3,
+        expAr: "المعادن موصلات ممتازة للحرارة لاحتوائها على إلكترونات حرة الحركة تنقل الطاقة بسرعة.",
+        expEn: "Metals conduct heat fastest due to closely packed atoms and free-moving electrons."
+      },
+      {
+        id: "p4_q4",
+        part: 4,
+        qAr: "انتقال الطاقة الحرارية بطريقة الحمل ينتج عن حركة المائع بسبب ..",
+        qEn: "Thermal energy transfer by convection results from fluid motion caused by ..",
+        optionsAr: ["الموجات الميكانيكية", "تساوي درجات الحرارة", "اختلاف درجات الحرارة", "الموجات الكهرومغناطيسية"],
+        optionsEn: ["Mechanical waves", "Equal temperatures", "Differences in temperature", "Electromagnetic waves"],
+        correct: 2,
+        expAr: "اختلاف درجات الحرارة يسبب اختلافاً في كثافة المائع فيصعد المائع الساخن ويهبط البارد.",
+        expEn: "Temperature differences create density variations in fluids, driving convection currents."
+      },
+      {
+        id: "p4_q5",
+        part: 4,
+        qAr: "الإشعاع الحراري هو انتقال الحرارة بواسطة موجات ..",
+        qEn: "Thermal radiation is the transfer of heat by means of ..",
+        optionsAr: ["كهرومغناطيسية", "ميكانيكية", "طولية", "موقوفة"],
+        optionsEn: ["Electromagnetic waves", "Mechanical waves", "Longitudinal waves", "Standing waves"],
+        correct: 0,
+        expAr: "الإشعاع الحراري ينقل الطاقة عبر موجات كهرومغناطيسية ولا يحتاج لوسط مادي.",
+        expEn: "Thermal radiation transfers energy via electromagnetic waves and can travel through a vacuum."
+      },
+
+      // ==================== CHAPTER 5: WAVES & SOUND ====================
+      {
+        id: "p5_q1",
+        part: 5,
+        qAr: "أي التالي يمثّل حركة توافقية بسيطة؟",
+        qEn: "Which of the following represents Simple Harmonic Motion (SHM)?",
+        optionsAr: ["تأرجح البندول", "حركة المقذوفات", "انتقال الإلكترونات", "دوران عقارب الساعة"],
+        optionsEn: ["Swinging of a simple pendulum", "Projectile motion", "Motion of electrons", "Rotation of clock hands"],
+        correct: 0,
+        expAr: "تأرجح البندول البسيط بزاوية صغيرة يمثل حركة توافقية بسيطة لأن قوة الإرجاع تتناسب طردياً مع الإزاحة.",
+        expEn: "A simple pendulum swinging at small angles exhibits SHM because the restoring force is proportional to displacement."
+      },
+      {
+        id: "p5_q2",
+        part: 5,
+        qAr: "عند المقارنة بين الطاقة المختزنة في نابض استطال بمقدار <span dir='ltr'>0.4 m</span>، والطاقة المختزنة في النابض نفسه عندما يستطيل بمقدار <span dir='ltr'>0.2 m</span>؛ فإن الطاقة المختزنة أكبر ..",
+        qEn: "Comparing the elastic potential energy stored in a spring stretched by 0.4 m to that stored in the same spring stretched by 0.2 m, the stored energy is greater by ..",
+        optionsAr: [
+          "مرتين عندما يستطيل النابض 0.2 m",
+          "مرتين عندما يستطيل النابض 0.4 m",
+          "4 مرات عندما يستطيل النابض 0.2 m",
+          "4 مرات عندما يستطيل النابض 0.4 m"
+        ],
+        optionsEn: [
+          "2 times when stretched by 0.2 m",
+          "2 times when stretched by 0.4 m",
+          "4 times when stretched by 0.2 m",
+          "4 times when stretched by 0.4 m"
+        ],
+        correct: 3,
+        expAr: "طاقة الوضع المرونية PE = ½ k x² تتناسب طردياً مع مربع الاستطالة؛ وبما أن 0.4 ضعف 0.2 فإن الطاقة أكبر بـ 2² = 4 مرات.",
+        expEn: "Elastic potential energy PE = ½ k x² is proportional to x². Doubling stretch (0.2 m to 0.4 m) increases PE by 2² = 4 times."
+      },
+      {
+        id: "p5_q3",
+        part: 5,
+        qAr: "نابض ثابته <span dir='ltr'>400 N/m</span>، وأثرت عليه قوة فتمدد بحيث أصبح مقدار طاقة الوضع المرونية المختزنة فيه <span dir='ltr'>50 J</span>، إن استطالة هذا النابض بالمتر تساوي ..",
+        qEn: "A spring with a spring constant of 400 N/m is stretched so that it stores 50 J of elastic potential energy. What is the elongation (x) of the spring in meters?",
+        optionsAr: ["4", "2", "1/2", "1/4"],
+        optionsEn: ["4", "2", "1/2", "1/4"],
+        correct: 2,
+        expAr: "PE = ½ k x² ⟹ 50 = ½ (400) x² ⟹ 50 = 200 x² ⟹ x² = 1/4 ⟹ x = 1/2 m.",
+        expEn: "PE = ½ k x² ⟹ 50 = ½ (400) x² ⟹ x² = 50 / 200 = 1/4 ⟹ x = 1/2 m."
+      },
+      {
+        id: "p5_q4",
+        part: 5,
+        qAr: "عند المقارنة بين الزمن الدوري لبندول على سطح الأرض وبندول آخر على سطح القمر، في أي الحالات التالية الزمن الدوري أكبر؟ علماً أن تسارع الجاذبية الأرضية أكبر بست مرات من التسارع على سطح القمر.",
+        qEn: "Comparing the period of a pendulum on Earth to one on the Moon (where Earth's gravity is 6 times stronger than the Moon's), in which case is the period greatest?",
+        optionsAr: [
+          "البندول على سطح القمر وطول خيطه 50 cm",
+          "البندول على سطح القمر وطول خيطه 100 cm",
+          "البندول على سطح الأرض وطول خيطه 50 cm",
+          "البندول على سطح الأرض وطول خيطه 100 cm"
+        ],
+        optionsEn: [
+          "Pendulum on the Moon with string length 50 cm",
+          "Pendulum on the Moon with string length 100 cm",
+          "Pendulum on Earth with string length 50 cm",
+          "Pendulum on Earth with string length 100 cm"
+        ],
+        correct: 1,
+        expAr: "T = 2π√(L/g)؛ يزداد الزمن الدوري بزيادة طول الخيط L ونقصان الجاذبية g، لذا يكون أكبر ما يمكن على القمر وبأطول خيط (100 cm).",
+        expEn: "T = 2π√(L/g). Period increases with longer string length (L) and weaker gravity (g), so it is largest on the Moon with L = 100 cm."
+      },
+      {
+        id: "p5_q5",
+        part: 5,
+        qAr: "اضطراب ينتقل خلال الوسط ..",
+        qEn: "A disturbance that carries energy through matter or space is called a ..",
+        optionsAr: ["التردد", "الموجة", "سعة الموجة", "العقدة"],
+        optionsEn: ["Frequency", "Wave", "Amplitude", "Node"],
+        correct: 1,
+        expAr: "الموجة هي اضطراب ينتقل خلال الوسط أو الفراغ وينقل الطاقة.",
+        expEn: "A wave is a disturbance that travels through a medium or space, transferring energy."
+      },
+
+      // ==================== CHAPTER 6: LIGHT & OPTICS ====================
+      {
+        id: "p6_q1",
+        part: 6,
+        qAr: "العلم الذي يدرس الضوء باعتباره شعاعاً ضوئياً، وبغض النظر عن كون الضوء جسيماً أو موجة ..",
+        qEn: "The branch of physics that studies light as rays, regardless of whether light is a particle or a wave, is ..",
+        optionsAr: ["ميكانيكا الكم", "البصريات", "الفيزياء النسبية", "فيزياء الليزر"],
+        optionsEn: ["Quantum mechanics", "Optics (Ray model of light)", "Relativistic physics", "Laser physics"],
+        correct: 1,
+        expAr: "علم البصريات (نموذج الشعاع الضوئي) يدرس مسارات الضوء وانعكاسه وانكساره.",
+        expEn: "Optics (the ray model of light) studies how light travels, reflects, and refracts."
+      },
+      {
+        id: "p6_q2",
+        part: 6,
+        qAr: "لا يمكن لأي جسم مهما كانت سرعته أن يسبق ظله لأن الضوء ..",
+        qEn: "No physical object, regardless of its speed, can outrun its shadow because light ..",
+        optionsAr: ["سرعته عالية جداً", "يسير بخطوط مستقيمة", "له طاقة عالية", "يضيء الأجسام"],
+        optionsEn: ["Has an extremely high speed", "Travels in straight lines", "Carries high energy", "Illuminates objects"],
+        correct: 0,
+        expAr: "سرعة الضوء في الفراغ (3×10⁸ m/s) هي السرعة القصوى في الكون.",
+        expEn: "Light travels at the cosmic speed limit (3 × 10⁸ m/s), faster than any material object can move."
+      },
+      {
+        id: "p6_q3",
+        part: 6,
+        qAr: "وحدة اللوكس تُستخدم لقياس ..",
+        qEn: "The unit Lux (lx) is used to measure ..",
+        optionsAr: ["الاستقطاب", "شدة الإضاءة", "الاستضاءة", "التدفق الضوئي"],
+        optionsEn: ["Polarization", "Luminous intensity", "Illuminance", "Luminous flux"],
+        correct: 2,
+        expAr: "تُقاس الاستضاءة (E) بوحدة اللوكس (lx) والتي تكافئ لومن لكل متر مربع (lm/m²).",
+        expEn: "Illuminance (E) is measured in lux (lx), equal to lumens per square meter (lm/m²)."
+      },
+      {
+        id: "p6_q4",
+        part: 6,
+        qAr: "إذا اعتبرنا أن <span dir='ltr'>P</span> التدفق الضوئي لمصدر مضيء، و <span dir='ltr'>r</span> البُعد العمودي بين المصدر والسطح؛ فإن شدة الاستضاءة <span dir='ltr'>E</span> تتناسب ..",
+        qEn: "If P is the luminous flux of a point source and r is the perpendicular distance from the source to a surface, then illuminance E is ..",
+        optionsAr: [
+          "طردياً مع P و r<sup>2</sup>",
+          "عكسياً مع P و r<sup>2</sup>",
+          "طردياً مع P وعكسياً مع r<sup>2</sup>",
+          "عكسياً مع P وطردياً مع r<sup>2</sup>"
+        ],
+        optionsEn: [
+          "Directly proportional to P and r<sup>2</sup>",
+          "Inversely proportional to P and r<sup>2</sup>",
+          "Directly proportional to P and inversely proportional to r<sup>2</sup>",
+          "Inversely proportional to P and directly proportional to r<sup>2</sup>"
+        ],
+        correct: 2,
+        expAr: "قانون التربيع العكسي للاستضاءة: E = P / (4πr²)، فهي طردية مع P وعكسية مع r².",
+        expEn: "From E = P / (4πr²), illuminance E is directly proportional to luminous flux P and inversely proportional to r²."
+      },
+      {
+        id: "p6_q5",
+        part: 6,
+        qAr: "السنة الضوئية تُعبّر عن ..",
+        qEn: "A light-year is a unit used to express ..",
+        optionsAr: ["مسافة", "شدة", "سرعة", "زمن"],
+        optionsEn: ["Distance", "Intensity", "Speed", "Time"],
+        correct: 0,
+        expAr: "السنة الضوئية هي المسافة التي يقطعها الضوء في سنة كاملة.",
+        expEn: "A light-year is the distance that light travels in one Earth year."
+      },
+
+      // ==================== CHAPTER 7: ELECTRICITY & ELECTRIC CIRCUITS ====================
+      {
+        id: "p7_q1",
+        part: 7,
+        qAr: "الذرة متعادلة كهربائياً فيها ..",
+        qEn: "An electrically neutral atom has ..",
+        optionsAr: [
+          "العدد الذري يساوي العدد الكتلي",
+          "عدد البروتونات يساوي عدد النيوترونات",
+          "عدد البروتونات يساوي عدد الإلكترونات",
+          "عدد الإلكترونات يساوي عدد النيوترونات"
+        ],
+        optionsEn: [
+          "Atomic number equal to mass number",
+          "Number of protons equal to number of neutrons",
+          "Number of protons equal to number of electrons",
+          "Number of electrons equal to number of neutrons"
+        ],
+        correct: 2,
+        expAr: "تتعادل الذرة كهربائياً عندما يتساوى عدد البروتونات الموجبة مع عدد الإلكترونات السالبة.",
+        expEn: "An atom is electrically neutral when the number of positively charged protons equals the number of negatively charged electrons."
+      },
+      {
+        id: "p7_q2",
+        part: 7,
+        qAr: "الفرقعة التي قد نسمعها عندما نمشي فوق سجادة سببها الشحن بـ ..",
+        qEn: "The crackling spark we sometimes hear when walking across a carpet is caused by charging by ..",
+        optionsAr: ["التوصيل", "الحث", "التأريض", "الدلك"],
+        optionsEn: ["Conduction", "Induction", "Grounding", "Friction"],
+        correct: 3,
+        expAr: "احتكاك الحذاء بالسجادة ينقل الإلكترونات بينهما وهي طريقة الشحن بالدلك.",
+        expEn: "Rubbing shoes against a carpet transfers electrons through charging by friction."
+      },
+      {
+        id: "p7_q3",
+        part: 7,
+        qAr: "عملية شحن الجسم دون ملامسته تُسمى الشحن بطريقة ..",
+        qEn: "The process of charging a neutral object without touching it is called charging by ..",
+        optionsAr: ["التوصيل", "الحث", "التأريض", "الدلك"],
+        optionsEn: ["Conduction", "Induction", "Grounding", "Friction"],
+        correct: 1,
+        expAr: "الشحن بالحث يتم بتقريب جسم مشحون من جسم متعادل دون ملامسته.",
+        expEn: "Charging by induction redistributes charges in a neutral body without direct contact."
+      },
+      {
+        id: "p7_q4",
+        part: 7,
+        qAr: "إذا قُرّب قضيب من كشاف كهربائي مشحون، وازداد انفراج ورقتي الكشاف؛ فهذا يدل على أن الكشاف الكهربائي والقضيب ..",
+        qEn: "When a rod is brought near a charged electroscope and the leaves diverge further apart, this indicates that the electroscope and the rod ..",
+        optionsAr: [
+          "مشحونان بالشحنة نفسها",
+          "مشحونان بشحنتين مختلفتين",
+          "غير مشحونين",
+          "أحدهما فقط مشحون"
+        ],
+        optionsEn: [
+          "Have the same type of charge",
+          "Have opposite charges",
+          "Are both uncharged",
+          "Only one of them is charged"
+        ],
+        correct: 0,
+        expAr: "ازدياد الانفراج يعني تنافر شحنات إضافية من النوع نفسه نحو الورقتين، إذن لهما الشحنة نفسها.",
+        expEn: "Increased divergence means like charges are repelled down into the leaves, proving both carry the same charge."
+      },
+      {
+        id: "p7_q5",
+        part: 7,
+        qAr: "إذا زادت المسافة بين شحنتين بينهما قوة تجاذب إلى <span dir='ltr'>4</span> أمثال؛ فإن القوة الجديدة تساوي ..",
+        qEn: "If the distance between two attracting point charges is increased to 4 times its original value, the new electrostatic force equals ..",
+        optionsAr: ["1/4 قيمتها", "1/16 من قيمتها", "4 مرات قيمتها", "16 مرة قيمتها"],
+        optionsEn: ["1/4 of its value", "1/16 of its value", "4 times its value", "16 times its value"],
+        correct: 1,
+        expAr: "بحسب قانون كولوم F ∝ 1/r²؛ عند زيادة المسافة 4 أمثال تقل القوة بمقدار 1 / 4² = 1/16.",
+        expEn: "By Coulomb's Law (F ∝ 1/r²), increasing distance by 4 reduces the force by 1/4² = 1/16."
+      },
+
+      // ==================== CHAPTER 8: MAGNETISM & ELECTROMAGNETISM ====================
+      {
+        id: "p8_q1",
+        part: 8,
+        qAr: "عدد خطوط المجال المغناطيسي التي تخترق السطح ..",
+        qEn: "The number of magnetic field lines passing through a given surface is called ..",
+        optionsAr: ["التدفق الكهرومغناطيسي", "التدفق المغناطيسي", "المجالات الكهرومغناطيسية", "المجالات المغناطيسية"],
+        optionsEn: ["Electromagnetic flux", "Magnetic flux", "Electromagnetic fields", "Magnetic fields"],
+        correct: 1,
+        expAr: "التدفق المغناطيسي هو عدد خطوط المجال المغناطيسي التي تخترق السطح عمودياً.",
+        expEn: "Magnetic flux is defined as the number of magnetic field lines passing through a surface."
+      },
+      {
+        id: "p8_q2",
+        part: 8,
+        qAr: "التدفق المغناطيسي عبر وحدة المساحة يتناسب طردياً مع ..",
+        qEn: "Magnetic flux per unit area is directly proportional to ..",
+        optionsAr: ["نوع القطب المغناطيسي", "شدة المجال المغناطيسي", "اتجاه المجال المغناطيسي", "شكل المجال المغناطيسي"],
+        optionsEn: ["Type of magnetic pole", "Magnetic field strength (B)", "Direction of magnetic field", "Shape of magnetic field"],
+        correct: 1,
+        expAr: "شدة المجال المغناطيسي B تساوي التدفق المغناطيسي مقسوماً على المساحة (B = Φ / A).",
+        expEn: "Magnetic field strength (B = Φ / A) is directly proportional to the magnetic flux per unit area."
+      },
+      {
+        id: "p8_q3",
+        part: 8,
+        qAr: "شكل المجال المغناطيسي حول سلك مستقيم يحمل تياراً ..",
+        qEn: "The shape of the magnetic field around a straight current-carrying wire is ..",
+        optionsAr: ["حلقات بيضاوية", "حلقات إهليلجية", "حلقات دائرية", "حلقات حلزونية"],
+        optionsEn: ["Oval loops", "Elliptical loops", "Concentric circular loops", "Helical loops"],
+        correct: 2,
+        expAr: "تتشكل خطوط المجال المغناطيسي حول سلك مستقيم على هيئة دوائر متحدة المركز يقع السلك في مركزها.",
+        expEn: "Magnetic field lines around a straight current-carrying wire form concentric circles centered on the wire."
+      },
+      {
+        id: "p8_q4",
+        part: 8,
+        qAr: "شدة المجال المغناطيسي المتولّد حول سلك مستقيم يحمل تياراً تتناسب ..",
+        qEn: "The strength of the magnetic field generated around a straight current-carrying wire is ..",
+        optionsAr: [
+          "طردياً مع كتلة السلك",
+          "عكسياً مع كتلة السلك",
+          "طردياً مع البُعد عن السلك",
+          "عكسياً مع البُعد عن السلك"
+        ],
+        optionsEn: [
+          "Directly proportional to the wire's mass",
+          "Inversely proportional to the wire's mass",
+          "Directly proportional to the distance from the wire",
+          "Inversely proportional to the distance from the wire"
+        ],
+        correct: 3,
+        expAr: "تقل شدة المجال المغناطيسي كلما ابتعدنا عن السلك (B ∝ I / r).",
+        expEn: "Magnetic field strength decreases inversely with distance from the wire (B ∝ I / r)."
+      },
+      {
+        id: "p8_q5",
+        part: 8,
+        qAr: "المجال الناتج عن مغناطيس دائم يشبه المجال الناتج عن مرور تيار كهربائي في ..",
+        qEn: "The magnetic field produced by a permanent bar magnet resembles the field produced by an electric current flowing through a ..",
+        optionsAr: ["سلك مستقيم", "ملف دائري", "ملف لولبي", "حلقة سلكية"],
+        optionsEn: ["Straight wire", "Circular loop", "Solenoid", "Single wire ring"],
+        correct: 2,
+        expAr: "الملف اللولبي (Solenoid) يولّد مجالاً مغناطيسياً له قطبان شمالي وجنوبي يشبه المغناطيس الدائم.",
+        expEn: "A current-carrying solenoid produces a magnetic field with north and south poles identical to a bar magnet."
+      },
+
+      // ==================== CHAPTER 9: MODERN PHYSICS ====================
+      {
+        id: "p9_q1",
+        part: 9,
+        qAr: "صيغة طاقة اهتزاز الذرة ..",
+        qEn: "The formula for the quantized vibrational energy of an atom is ..",
+        optionsAr: ["nhf", "nhλ", "nhc", "nhv"],
+        optionsEn: ["nhf", "nhλ", "nhc", "nhv"],
+        correct: 0,
+        expAr: "بحسب فرضية بلانك E = n h f حيث n عدد صحيح و h ثابت بلانك و f التردد.",
+        expEn: "According to Planck's quantization formula, E = n h f, where n is an integer, h is Planck's constant, and f is frequency."
+      },
+      {
+        id: "p9_q2",
+        part: 9,
+        qAr: "إذا تغيرت طاقة اهتزاز ذرة من <span dir='ltr'>5hf</span> إلى <span dir='ltr'>3hf</span>؛ فإن الذرة في هذه الحالة ..",
+        qEn: "If the vibrational energy of an atom changes from 5hf to 3hf, the atom ..",
+        optionsAr: ["تبعث طاقة 8hf", "تمتص طاقة 8hf", "تبعث طاقة 2hf", "تمتص طاقة 2hf"],
+        optionsEn: ["Emits energy of 8hf", "Absorbs energy of 8hf", "Emits energy of 2hf", "Absorbs energy of 2hf"],
+        correct: 2,
+        expAr: "انتقلت الذرة من مستوى طاقة أعلى (5hf) إلى أقل (3hf) فتبعث فرق الطاقة = 5hf - 3hf = 2hf.",
+        expEn: "Dropping from a higher energy level (5hf) to a lower one (3hf) causes the atom to emit ΔE = 5hf - 3hf = 2hf."
+      },
+      {
+        id: "p9_q3",
+        part: 9,
+        qAr: "عندما تتغير طاقة ذرة بسبب امتصاص فوتون تردده <span dir='ltr'>10<sup>12</sup> Hz</span>؛ فإن طاقة الذرة سوف .. (<span dir='ltr'>h = 6.626 × 10<sup>-34</sup> J/Hz</span>)",
+        qEn: "When an atom changes its energy by absorbing a photon of frequency 10<sup>12</sup> Hz, the atom's energy will .. (h = 6.626 × 10<sup>-34</sup> J/Hz)",
+        optionsAr: [
+          "تزداد بمقدار 6.626 × 10<sup>-34</sup> J",
+          "تزداد بمقدار 6.626 × 10<sup>-22</sup> J",
+          "تنقص بمقدار 6.626 × 10<sup>-34</sup> J",
+          "تنقص بمقدار 6.626 × 10<sup>-22</sup> J"
+        ],
+        optionsEn: [
+          "Increase by 6.626 × 10<sup>-34</sup> J",
+          "Increase by 6.626 × 10<sup>-22</sup> J",
+          "Decrease by 6.626 × 10<sup>-34</sup> J",
+          "Decrease by 6.626 × 10<sup>-22</sup> J"
+        ],
+        correct: 1,
+        expAr: "الامتصاص يزيد طاقة الذرة بمقدار E = h·f = (6.626 × 10⁻³⁴) × 10¹² = 6.626 × 10⁻²² J.",
+        expEn: "Absorbing a photon increases atomic energy by E = h·f = (6.626 × 10⁻³⁴) × 10¹² = 6.626 × 10⁻²² J."
+      },
+      {
+        id: "p9_q4",
+        part: 9,
+        qAr: "طاقة الذرة مكمّاة يقصد بها أنها تأخذ القيم ..",
+        qEn: "Saying that an atom's energy is quantized means it can only take discrete values multiplied by ..",
+        optionsAr: ["الفردية", "الزوجية", "الكسرية", "الصحيحة"],
+        optionsEn: ["Odd numbers", "Even numbers", "Fractional numbers", "Integer numbers"],
+        correct: 3,
+        expAr: "تكميم الطاقة يعني أن الطاقة توجد في حزم منفصلة مضاعفة بأعداد صحيحة (n = 1, 2, 3...).",
+        expEn: "Quantization means energy exists only in discrete integer multiples (n = 1, 2, 3...) of hf."
+      },
+      {
+        id: "p9_q5",
+        part: 9,
+        qAr: "أقل قيمة لطاقة الذرة المهتزة ..",
+        qEn: "The minimum non-zero energy value of a vibrating atom (at n = 1) is ..",
+        optionsAr: ["hf", "2hf", "1/2 hf", "1/4 hf"],
+        optionsEn: ["hf", "2hf", "1/2 hf", "1/4 hf"],
+        correct: 0,
+        expAr: "عندما n = 1 تكون أقل كمية طاقة اهتزاز هي E = 1 × h f = hf.",
+        expEn: "For n = 1, the fundamental quantum of vibrational energy is E = hf."
+      },
+
+      // ==================== CHAPTER 10: NUCLEAR PHYSICS ====================
+      {
+        id: "p10_q1",
+        part: 10,
+        qAr: "العدد الكتلي في ذرة يساوي ..",
+        qEn: "The mass number (A) of an atom equals ..",
+        optionsAr: ["عدد النيوترونات", "عدد البروتونات والإلكترونات", "عدد البروتونات", "العدد الذري وعدد النيوترونات"],
+        optionsEn: ["The number of neutrons", "The number of protons and electrons", "The number of protons", "The atomic number plus the number of neutrons"],
+        correct: 3,
+        expAr: "العدد الكتلي A = Z + N (مجموع العدد الذري أي البروتونات + عدد النيوترونات).",
+        expEn: "Mass number A = Z + N (atomic number/protons + number of neutrons)."
+      },
+      {
+        id: "p10_q2",
+        part: 10,
+        qAr: "عدد النيوترونات هو ..",
+        qEn: "The number of neutrons (N) in a nucleus is equal to ..",
+        optionsAr: [
+          "العدد الذري",
+          "العدد الكتلي",
+          "العدد الكتلي مطروحاً منه العدد الذري",
+          "العدد الذري مطروحاً منه العدد الكتلي"
+        ],
+        optionsEn: [
+          "The atomic number",
+          "The mass number",
+          "The mass number minus the atomic number",
+          "The atomic number minus the mass number"
+        ],
+        correct: 2,
+        expAr: "عدد النيوترونات N = A - Z (العدد الكتلي مطروحاً منه العدد الذري).",
+        expEn: "Number of neutrons N = A - Z (mass number minus atomic number)."
+      },
+      {
+        id: "p10_q3",
+        part: 10,
+        qAr: "في العنصر <span dir='ltr'><sup>210</sup><sub>82</sub>Pb</span> عدد البروتونات يساوي ..",
+        qEn: "In the isotope <span dir='ltr'><sup>210</sup><sub>82</sub>Pb</span>, the number of protons equals ..",
+        optionsAr: ["82", "128", "210", "292"],
+        optionsEn: ["82", "128", "210", "292"],
+        correct: 0,
+        expAr: "العدد السفلي يمثل العدد الذري Z وهو عدد البروتونات = 82.",
+        expEn: "The subscript represents the atomic number Z, which equals the number of protons (82)."
+      },
+      {
+        id: "p10_q4",
+        part: 10,
+        qAr: "عدد النيوترونات في البوتاسيوم <span dir='ltr'><sup>39</sup><sub>19</sub>K</span> يساوي ..",
+        qEn: "The number of neutrons in Potassium <span dir='ltr'><sup>39</sup><sub>19</sub>K</span> equals ..",
+        optionsAr: ["19", "20", "39", "58"],
+        optionsEn: ["19", "20", "39", "58"],
+        correct: 1,
+        expAr: "N = A - Z = 39 - 19 = 20 نيوتروناً.",
+        expEn: "N = A - Z = 39 - 19 = 20 neutrons."
+      },
+      {
+        id: "p10_q5",
+        part: 10,
+        qAr: "في نواة الحديد <span dir='ltr'><sup>56</sup><sub>26</sub>Fe</span> يوجد ..",
+        qEn: "Inside the nucleus of Iron <span dir='ltr'><sup>56</sup><sub>26</sub>Fe</span>, there are ..",
+        optionsAr: [
+          "26 بروتون و 26 نيوترون",
+          "26 إلكترون و 26 نيوترون",
+          "26 بروتون و 30 إلكترون",
+          "26 بروتون و 30 نيوترون"
+        ],
+        optionsEn: [
+          "26 protons and 26 neutrons",
+          "26 electrons and 26 neutrons",
+          "26 protons and 30 electrons",
+          "26 protons and 30 neutrons"
+        ],
+        correct: 3,
+        expAr: "عدد البروتونات Z = 26، وعدد النيوترونات N = 56 - 26 = 30 نيوتروناً داخل النواة.",
+        expEn: "Protons Z = 26, and neutrons N = 56 - 26 = 30 inside the nucleus."
+      }
+    ];
+
+    /**
+     * =========================================================================
+     * APPLICATION STATE
+     * =========================================================================
+     */
+    const state = {
+      lang: 'en', // Default interface starts in English ('en' | 'ar')
+      view: 'home', // 'home' | 'physics' | 'exam' | 'results'
+      studentName: '',
+      freeQuizUsed: false, // First quiz is completely free!
+      isUnlocked: false,   // Unlocked once the 5-digit access code is entered
+      selectedPartId: null,
+      pendingQuizConfig: null, // { partId, mode: 'single' | 'cumulative' }
+      chapterStats: {}, // Tracks session attempts & best score per part { [partId]: { attempts, bestPct } }
+      exam: {
+        partId: null,
+        titleAr: '',
+        titleEn: '',
+        questions: [],
+        currentIndex: 0,
+        answers: {}, // { questionIndex: optionIndex }
+        flagged: {}, // { questionIndex: true }
+        questionTimers: {}, // { questionIndex: remainingSeconds (60s per question) }
+        expiredQuestions: {}, // { questionIndex: true }
+        elapsedSeconds: 0,
+        timerInterval: null,
+        fontSize: 'md' // 'sm' | 'md' | 'lg'
+      }
+    };
+
+    /**
+     * =========================================================================
+     * BILINGUAL UI DICTIONARY
+     * =========================================================================
+     */
+    const UI_TEXT = {
+      ar: {
+        headerTitle: "الاختبار التحصيلي التجريبي المحوسب (SAAT)",
+        headerSub: "محاكاة بيئة الاختبارات المحوسبة • التدريب الذكي",
+        langToggle: "EN",
+        teacherBtn: "رمز الدخول",
+        freePill: "التدريب الأول مجاني",
+        unlockedPill: "العضوية مفعّلة بالكامل",
+        lockedPill: "مطلوب رمز الدخول (5 أرقام)",
+
+        // Home View
+        heroBadge: "منصة التدريب الذكي لاختبار التحصيلي",
+        heroTitle: "اختر المادة الدراسية لبدء التدريب المحوسب",
+        heroDesc: "تدرب على أسئلة التحصيلي بنظام يحاكي اختبار قياس المحوسب الفعلي، مع مؤقت 60 ثانية لكل سؤال، وتظليل الأسئلة للمراجعة، وتوليد عشوائي للأسئلة بعد حفظ كل قسم.",
+        studentNameLabel: "اسم الطالب / الطالبة (اختياري - يظهر في شريط الاختبار):",
+        studentNamePlaceholder: "أدخل اسمك هنا...",
+        physicsCardTitle: "الفيزياء",
+        physicsCardSub: "أسئلة تدريبية للتحضير لاختبار التحصيلي",
+        physicsCardBadge: "متاح الآن",
+        physicsStartBtn: "الدخول إلى أقسام الفيزياء",
+        chemCardTitle: "الكيمياء",
+        chemCardSub: "أسئلة تدريبية للتحضير لاختبار التحصيلي • قريباً",
+        chemCardBadge: "قريباً",
+        chemStartBtn: "سيتم إضافة الأسئلة قريباً",
+        feature1Title: "11 قسماً متدرجاً",
+        feature1Sub: "تدريب مخصص أو تراكمي",
+        feature2Title: "60 ثانية / سؤال",
+        feature2Sub: "محاكاة ضغط الوقت الفعلي",
+        feature3Title: "تصحيح فوري",
+        feature3Sub: "شرح علمي لكل سؤال",
+
+        // Physics Parts View
+        backToSubjects: "العودة لاختيار المادة",
+        physicsHubTitle: "الفيزياء",
+        physicsHubDesc: "اختر القسم الذي قمت بحفظه لبدء التدريب (60 ثانية لكل سؤال).",
+        comprehensiveBadgeLabel: "20 سؤالاً • جميع الأقسام",
+        practiceBtn: "بدء التدريب",
+        comprehensiveBtn: "بدء الاختبار الشامل",
+        bestScoreLabel: "أعلى نتيجة:",
+        attemptsLabel: "محاولات:",
+
+        // Mode Modal
+        modeModalTitle: "اختر نمط التدريب لهذا القسم",
+        modeModalDesc: "حدد طريقة توليد الأسئلة العشوائية (60 ثانية مخصصة لكل سؤال):",
+        modeSingleTitle: "تدريب على هذا القسم فقط",
+        modeSingleSub: "توليد أسئلة عشوائية من هذا الفصل فقط لقياس إتقانك له.",
+        modeCumTitle: "مراجعة تراكمية (هذا القسم + جميع الأقسام السابقة)",
+        modeCumSub: "توليد أسئلة عشوائية تجمع هذا القسم مع كل الأقسام التي تسبقه لتثبيت الحفظ.",
+        modeFirstChapterNote: "ملاحظة: هذا هو القسم الأول، لذا سيشمل التدريب أسئلة القسم الأول.",
+
+        // Code Modal
+        codeModalTitle: "أدخل رمز الدخول (5 أرقام)",
+        codeModalDesc: "لقد استخدمت التدريب المجاني الأول! أدخل رمز الدخول المكون من 5 أرقام لمرة واحدة فقط لفتح جميع الأقسام والاختبارات.",
+        codeError: "الرمز غير صحيح! يرجى إدخال الرمز المكون من 5 أرقام بشكل صحيح.",
+        codeSubmit: "تفعيل الرمز ومتابعة الاختبار",
+
+        // Teacher Modal
+        teacherModalTitle: "إعدادات رمز الدخول (للمعلم)",
+        teacherModalDescPrefix: "رمز الدخول الحالي للطلاب هو:",
+        teacherModalDescSuffix: "يمكنك تعديله هنا لتجربة القفل الفوري في هذه الجلسة.",
+        teacherInputLabel: "تعيين رمز جديد من 5 أرقام:",
+        teacherSave: "حفظ الرمز الجديد",
+        teacherReset: "إعادة تفعيل القفل للتجربة",
+
+        // Exam Interface (Qiyas Computerized Style)
+        candidateLabel: "المتقدم:",
+        defaultStudent: "طالب التحصيلي",
+        questionCounter: (curr, total) => `السؤال ${curr} من ${total}`,
+        questionTimerLabel: "وقت السؤال",
+        questionExpiredNotice: "انتهى الوقت المخصص لهذا السؤال (60 ثانية) وتم قفل الإجابة.",
+        flagBtn: "تمييز للمراجعة",
+        flaggedBtn: "مميز للمراجعة",
+        constantsBtn: "الثوابت الفيزيائية",
+        reviewAllBtn: "مراجعة الكل",
+        prevBtn: "السابق",
+        nextBtn: "التالي",
+        endExamBtn: "إنهاء الاختبار",
+        legendAnswered: "مُجاب",
+        legendUnanswered: "غير مُجاب",
+        legendFlagged: "مميز للمراجعة",
+        optionLetters: ["أ", "ب", "ج", "د"],
+
+        // Review Grid Modal
+        reviewModalTitle: "ملخص ومراجعة حالة الأسئلة",
+        statAnswered: "تمت الإجابة",
+        statUnanswered: "لم تتم الإجابة",
+        statFlagged: "مميز للمراجعة",
+        endExamWarn: "تنبيه: عند إنهاء الاختبار سيتم اعتماد إجاباتك وعرض النتيجة والتصحيح النموذجي.",
+        reviewContinueBtn: "العودة إلى الأسئلة",
+        reviewFinishBtn: "إنهاء الاختبار وعرض النتيجة",
+
+        // Results View
+        resultsHeader: "تقرير نتيجة الاختبار التجريبي المحوسب",
+        scoreLabel: "الدرجة النهائية",
+        correctCountLabel: "إجابات صحيحة",
+        wrongCountLabel: "إجابات خاطئة / متروكة",
+        timeSpentLabel: "الزمن المستغرق",
+        retryNewRandomBtn: "تدريب جديد (أسئلة عشوائية جديدة)",
+        backToPartsBtn: "العودة إلى الفيزياء",
+        detailedReviewTitle: "المراجعة التفصيلية للأسئلة والإجابات الصحيحة",
+        yourAnswerLabel: "إجابتك:",
+        notAnsweredLabel: "لم يتم اختيار إجابة",
+        correctAnswerLabel: "الإجابة الصحيحة:",
+        explanationLabel: "التفسير العلمي:"
+      },
+      en: {
+        headerTitle: "SAAT Computerized Practice Exam",
+        headerSub: "Qiyas Computerized Test Simulation • Smart Practice",
+        langToggle: "ع",
+        teacherBtn: "Access Code",
+        freePill: "1st Quiz Free",
+        unlockedPill: "Full Access Unlocked",
+        lockedPill: "5-Digit Code Required",
+
+        // Home View
+        heroBadge: "Smart SAAT Preparation Platform",
+        heroTitle: "Select a Subject to Start Computerized Practice",
+        heroDesc: "Practice SAAT questions in an authentic Qiyas computerized test environment featuring a 60-second timer per question, question flagging, and randomized quizzes after memorizing each chapter.",
+        studentNameLabel: "Student Name (Optional — displayed in exam header):",
+        studentNamePlaceholder: "Enter your name...",
+        physicsCardTitle: "Physics",
+        physicsCardSub: "Practice questions preparing for SAAT exam",
+        physicsCardBadge: "Available Now",
+        physicsStartBtn: "Enter Physics",
+        chemCardTitle: "Chemistry",
+        chemCardSub: "Practice questions preparing for SAAT exam • Coming Soon",
+        chemCardBadge: "Coming Soon",
+        chemStartBtn: "Questions Coming Soon",
+        feature1Title: "11 Structured Parts",
+        feature1Sub: "Part-only or cumulative mode",
+        feature2Title: "60s Per Question",
+        feature2Sub: "Authentic Qiyas pacing",
+        feature3Title: "Instant Review",
+        feature3Sub: "Step-by-step explanations",
+
+        // Physics Parts View
+        backToSubjects: "Back to Subject Selection",
+        physicsHubTitle: "Physics",
+        physicsHubDesc: "Select the chapter you have memorized to start practicing (60 seconds per question).",
+        comprehensiveBadgeLabel: "20 Questions • All Chapters",
+        practiceBtn: "Start Practice",
+        comprehensiveBtn: "Start Comprehensive Test",
+        bestScoreLabel: "Best:",
+        attemptsLabel: "Attempts:",
+
+        // Mode Modal
+        modeModalTitle: "Choose Practice Mode",
+        modeModalDesc: "Select how random questions are generated for this session (60 seconds per question):",
+        modeSingleTitle: "Practice This Part Only",
+        modeSingleSub: "Generates random questions exclusively from this chapter to test your mastery.",
+        modeCumTitle: "Cumulative Revision (This Part + All Previous Parts)",
+        modeCumSub: "Generates random questions pooled from Chapter 1 up to this chapter to reinforce retention.",
+        modeFirstChapterNote: "Note: This is Chapter 1, so both modes draw from Chapter 1.",
+
+        // Code Modal
+        codeModalTitle: "Enter 5-Digit Access Code",
+        codeModalDesc: "You have used your 1st free practice quiz! Enter the 5-digit access code once to unlock all chapters and quizzes.",
+        codeError: "Invalid code! Please check the 5-digit access code and try again.",
+        codeSubmit: "Verify Code & Start Quiz",
+
+        // Teacher Modal
+        teacherModalTitle: "Student Access Code Settings (Teacher)",
+        teacherModalDescPrefix: "The current student 5-digit access code is:",
+        teacherModalDescSuffix: "You can update it here to test the access gate during this session.",
+        teacherInputLabel: "Set new 5-digit code:",
+        teacherSave: "Update Code",
+        teacherReset: "Re-lock Trial for Testing",
+
+        // Exam Interface
+        candidateLabel: "Candidate:",
+        defaultStudent: "SAAT Student",
+        questionCounter: (curr, total) => `Question ${curr} of ${total}`,
+        questionTimerLabel: "Question Time",
+        questionExpiredNotice: "Time expired for this question (60s). Answer is locked.",
+        flagBtn: "Flag for Review",
+        flaggedBtn: "Flagged",
+        constantsBtn: "Physics Constants",
+        reviewAllBtn: "Review All",
+        prevBtn: "Previous",
+        nextBtn: "Next",
+        endExamBtn: "End Exam",
+        legendAnswered: "Answered",
+        legendUnanswered: "Unanswered",
+        legendFlagged: "Flagged",
+        optionLetters: ["A", "B", "C", "D"],
+
+        // Review Grid Modal
+        reviewModalTitle: "Question Status Summary",
+        statAnswered: "Answered",
+        statUnanswered: "Unanswered",
+        statFlagged: "Flagged",
+        endExamWarn: "Notice: Ending the exam will submit your answers and display your score report.",
+        reviewContinueBtn: "Return to Questions",
+        reviewFinishBtn: "End Exam & View Score",
+
+        // Results View
+        resultsHeader: "Computerized Mock Exam Score Report",
+        scoreLabel: "Final Score",
+        correctCountLabel: "Correct Answers",
+        wrongCountLabel: "Incorrect / Unanswered",
+        timeSpentLabel: "Time Taken",
+        retryNewRandomBtn: "New Random Quiz",
+        backToPartsBtn: "Back to Physics",
+        detailedReviewTitle: "Detailed Question Review & Answer Key",
+        yourAnswerLabel: "Your Answer:",
+        notAnsweredLabel: "No answer selected",
+        correctAnswerLabel: "Correct Answer:",
+        explanationLabel: "Explanation:"
+      }
+    };
+
+    /**
+     * =========================================================================
+     * HELPER UTILITIES & TACTILE UI SOUND FEEDBACK
+     * =========================================================================
+     */
+    function playUiTone(type) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        const now = ctx.currentTime;
+        if (type === 'select') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(520, now);
+          osc.frequency.exponentialRampToValueAtTime(680, now + 0.07);
+          gain.gain.setValueAtTime(0.05, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'flag') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.setValueAtTime(587, now + 0.06);
+          gain.gain.setValueAtTime(0.05, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+          osc.start(now);
+          osc.stop(now + 0.14);
+        } else if (type === 'complete') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.09);
+          osc.frequency.setValueAtTime(783.99, now + 0.18);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        }
+      } catch (_) {
+        // Ignore audio errors on restricted browsers
+      }
+    }
+
+    function t(key) {
+      return UI_TEXT[state.lang][key];
+    }
+
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function formatTime(totalSec) {
+      const s = Math.max(0, totalSec);
+      const mins = Math.floor(s / 60);
+      const secs = s % 60;
+      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      const txt = document.getElementById('toast-msg');
+      txt.textContent = msg;
+      box.classList.remove('hidden');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        box.classList.add('hidden');
+      }, 3200);
+    }
+
+    /**
+     * =========================================================================
+     * LANGUAGE SWITCHER (ENGLISH <-> ARABIC)
+     * =========================================================================
+     */
+    function toggleLanguage() {
+      state.lang = state.lang === 'ar' ? 'en' : 'ar';
+      const htmlEl = document.documentElement;
+      htmlEl.lang = state.lang;
+      htmlEl.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+
+      updateHeaderUI();
+      renderCurrentView();
+    }
+
+    function updateHeaderUI() {
+      document.getElementById('hdr-title').textContent = t('headerTitle');
+      document.getElementById('hdr-subtitle').textContent = t('headerSub');
+      document.getElementById('lang-toggle-text').textContent = t('langToggle');
+      document.getElementById('hdr-teacher-btn').textContent = t('teacherBtn');
+    }
+
+    function handleLogoClick() {
+      if (state.view === 'exam') {
+        openReviewGridModal();
+      } else {
+        navigateTo('home');
+      }
+    }
+
+    function navigateTo(viewName) {
+      if (state.exam.timerInterval) {
+        clearInterval(state.exam.timerInterval);
+        state.exam.timerInterval = null;
+      }
+      state.view = viewName;
+      renderCurrentView();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderCurrentView() {
+      if (state.view === 'home') renderHomeView();
+      else if (state.view === 'physics') renderPhysicsView();
+      else if (state.view === 'exam') renderExamView();
+      else if (state.view === 'results') renderResultsView();
+    }
+
+    /**
+     * =========================================================================
+     * VIEW 1: SUBJECT SELECTION (PHYSICS vs CHEMISTRY)
+     * =========================================================================
+     */
+    function renderHomeView() {
+      const root = document.getElementById('app-root');
+      const isAr = state.lang === 'ar';
+
+      root.innerHTML = `
+        <div class="max-w-5xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-12 space-y-8 animate-view-enter">
+          <!-- Hero Card -->
+          <div class="bg-gradient-to-br from-white via-white to-teal-50/50 rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200/90 relative overflow-hidden">
+            <div class="absolute top-0 ${isAr ? 'left-0' : 'right-0'} w-64 h-64 bg-qiyas-teal/10 rounded-full blur-2xl -translate-y-1/2 ${isAr ? '-translate-x-1/4' : 'translate-x-1/4'} pointer-events-none"></div>
+            <div class="absolute bottom-0 ${isAr ? 'right-10' : 'left-10'} w-40 h-40 bg-amber-400/10 rounded-full blur-2xl translate-y-1/2 pointer-events-none"></div>
+
+            <div class="max-w-3xl space-y-4 relative z-10">
+              <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-qiyas-tealLight text-qiyas-teal shadow-2xs">
+                <span class="w-2 h-2 rounded-full bg-qiyas-teal animate-ping"></span>
+                ${t('heroBadge')}
+              </span>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-qiyas-navy leading-snug">
+                ${t('heroTitle')}
+              </h2>
+              <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                ${t('heroDesc')}
+              </p>
+
+              <!-- Student Name Input -->
+              <div class="pt-2 max-w-md">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">${t('studentNameLabel')}</label>
+                <div class="relative">
+                  <input
+                    type="text"
+                    value="${state.studentName.replace(/"/g, '&quot;')}"
+                    oninput="state.studentName = this.value"
+                    placeholder="${t('studentNamePlaceholder')}"
+                    class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-qiyas-teal focus:ring-4 focus:ring-teal-500/15 outline-none text-sm font-medium bg-white shadow-2xs transition"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Interactive Feature Highlights Strip -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-7 pt-6 border-t border-slate-200/70 relative z-10">
+              <div class="flex items-center gap-3 p-3 rounded-2xl bg-white/80 border border-slate-200/80">
+                <div class="w-9 h-9 rounded-xl bg-teal-100 text-qiyas-teal flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="text-xs font-extrabold text-qiyas-navy">${t('feature1Title')}</div>
+                  <div class="text-[11px] text-slate-500">${t('feature1Sub')}</div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 p-3 rounded-2xl bg-white/80 border border-slate-200/80">
+                <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="text-xs font-extrabold text-qiyas-navy">${t('feature2Title')}</div>
+                  <div class="text-[11px] text-slate-500">${t('feature2Sub')}</div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 p-3 rounded-2xl bg-white/80 border border-slate-200/80">
+                <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="text-xs font-extrabold text-qiyas-navy">${t('feature3Title')}</div>
+                  <div class="text-[11px] text-slate-500">${t('feature3Sub')}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subjects Grid: Physics vs Chemistry -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Physics Card -->
+            <div
+              onclick="navigateTo('physics')"
+              class="subject-card cursor-pointer bg-white rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-xl hover:shadow-teal-900/10 border-2 border-slate-200 hover:border-qiyas-teal group flex flex-col justify-between relative overflow-hidden"
+            >
+              <div class="absolute -bottom-8 ${isAr ? '-left-8' : '-right-8'} w-36 h-36 bg-qiyas-teal/5 rounded-full group-hover:scale-125 transition-transform duration-500 pointer-events-none"></div>
+
+              <div class="space-y-4 relative z-10">
+                <div class="flex items-center justify-between">
+                  <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-qiyas-navy to-qiyas-navyLight text-white flex items-center justify-center shadow-md group-hover:from-qiyas-teal group-hover:to-teal-600 transition-all animate-float-slow">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="2.5" />
+                      <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(30 12 12)" />
+                      <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(150 12 12)" />
+                      <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(90 12 12)" />
+                    </svg>
+                  </div>
+                  <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    ${t('physicsCardBadge')}
+                  </span>
+                </div>
+
+                <div>
+                  <h3 class="text-2xl sm:text-3xl font-extrabold text-qiyas-navy group-hover:text-qiyas-teal transition">
+                    ${t('physicsCardTitle')}
+                  </h3>
+                  <p class="text-sm font-medium text-slate-600 mt-2 leading-relaxed">
+                    ${t('physicsCardSub')}
+                  </p>
+                </div>
+              </div>
+
+              <div class="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between text-qiyas-teal font-bold text-sm relative z-10">
+                <span>${t('physicsStartBtn')}</span>
+                <span class="w-8 h-8 rounded-full bg-qiyas-tealLight group-hover:bg-qiyas-teal group-hover:text-white flex items-center justify-center transition">
+                  <svg class="w-4 h-4 transform ${isAr ? 'rotate-180 group-hover:-translate-x-0.5' : 'group-hover:translate-x-0.5'} transition" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </span>
+              </div>
+            </div>
+
+            <!-- Chemistry Card -->
+            <div
+              onclick="showToast('${isAr ? 'سيتم إضافة أسئلة الكيمياء قريباً! ابدأ بالفيزياء الآن.' : 'Chemistry questions will be added soon! Start with Physics now.'}')"
+              class="subject-card cursor-pointer bg-white/90 rounded-3xl p-6 sm:p-8 shadow-sm border-2 border-dashed border-slate-300 hover:border-slate-400 flex flex-col justify-between opacity-95"
+            >
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <div class="w-14 h-14 rounded-2xl bg-slate-200 text-slate-600 flex items-center justify-center">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                  </div>
+                  <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700">
+                    ${t('chemCardBadge')}
+                  </span>
+                </div>
+
+                <div>
+                  <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-700">
+                    ${t('chemCardTitle')}
+                  </h3>
+                  <p class="text-sm font-medium text-slate-500 mt-2 leading-relaxed">
+                    ${t('chemCardSub')}
+                  </p>
+                </div>
+              </div>
+
+              <div class="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between text-slate-500 font-semibold text-sm">
+                <span>${t('chemStartBtn')}</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    /**
+     * =========================================================================
+     * VIEW 2: PHYSICS 11 PARTS HUB
+     * =========================================================================
+     */
+    function renderPhysicsView() {
+      const root = document.getElementById('app-root');
+      const isAr = state.lang === 'ar';
+
+      const chapterParts = PHYSICS_PARTS.filter((p) => !p.isComprehensive);
+      const comprehensivePart = PHYSICS_PARTS.find((p) => p.isComprehensive);
+
+      const chapterCardsHtml = chapterParts
+        .map((part) => {
+          const stat = state.chapterStats[part.id];
+          const statBadgeHtml = stat
+            ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">
+                 ✓ ${t('bestScoreLabel')} ${stat.bestPct}%
+               </span>`
+            : '';
+
+          return `
+            <div
+              onclick="handlePartClick(${part.id})"
+              class="subject-card h-full cursor-pointer bg-white rounded-2xl p-5 shadow-md hover:shadow-xl border border-slate-200 hover:border-qiyas-teal group flex flex-col justify-between gap-4"
+            >
+              <div class="flex items-start gap-3.5">
+                <div class="w-11 h-11 rounded-xl bg-qiyas-tealLight text-qiyas-teal group-hover:bg-qiyas-teal group-hover:text-white font-extrabold text-base flex items-center justify-center shrink-0 transition shadow-2xs">
+                  ${String(part.id).padStart(2, '0')}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-start justify-between gap-1.5">
+                    <h3 class="font-bold text-slate-900 group-hover:text-qiyas-teal text-base leading-snug transition">
+                      ${isAr ? part.titleAr : part.titleEn}
+                    </h3>
+                    ${statBadgeHtml}
+                  </div>
+                  <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                    ${isAr ? part.subAr : part.subEn}
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
+                <span class="font-semibold text-slate-400">
+                  ${isAr ? `الفصل ${part.id} من 10` : `Chapter ${part.id} of 10`}
+                </span>
+                <span class="font-bold text-qiyas-teal flex items-center gap-1 group-hover:gap-2 transition-all">
+                  ${t('practiceBtn')}
+                  <svg class="w-4 h-4 transform ${isAr ? 'rotate-180' : ''}" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+      const compStat = comprehensivePart ? state.chapterStats[comprehensivePart.id] : null;
+      const compStatBadgeHtml = compStat
+        ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+             ✓ ${t('bestScoreLabel')} ${compStat.bestPct}%
+           </span>`
+        : '';
+
+      const comprehensiveCardHtml = comprehensivePart
+        ? `
+          <div
+            onclick="handlePartClick(${comprehensivePart.id})"
+            class="subject-card cursor-pointer bg-gradient-to-r from-qiyas-navy via-qiyas-navyLight to-qiyas-navy text-white rounded-2xl p-6 shadow-lg hover:shadow-xl border border-slate-700 group flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+          >
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500 text-qiyas-navy font-extrabold text-lg flex items-center justify-center shrink-0 shadow group-hover:scale-105 transition">
+                11
+              </div>
+              <div>
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                  <span class="inline-block text-xs font-bold text-amber-300">
+                    ${isAr ? 'الاختبار النهائي الشامل' : 'COMPREHENSIVE FINAL PRACTICE'}
+                  </span>
+                  ${compStatBadgeHtml}
+                </div>
+                <h3 class="text-lg sm:text-xl font-extrabold leading-snug">
+                  ${isAr ? comprehensivePart.titleAr : comprehensivePart.titleEn}
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-300 mt-1">
+                  ${isAr ? comprehensivePart.subAr : comprehensivePart.subEn}
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-white/10">
+              <span class="px-3 py-1.5 rounded-xl bg-white/10 text-xs font-bold text-teal-200">
+                ${t('comprehensiveBadgeLabel')}
+              </span>
+              <span class="px-4 py-2.5 rounded-xl bg-qiyas-teal group-hover:bg-teal-500 text-white font-bold text-sm transition flex items-center gap-1.5 shadow">
+                ${t('comprehensiveBtn')}
+              </span>
+            </div>
+          </div>
+        `
+        : '';
+
+      root.innerHTML = `
+        <div class="max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8 space-y-6 animate-view-enter">
+          <!-- Breadcrumb & Title -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-md">
+            <div>
+              <button
+                onclick="navigateTo('home')"
+                class="inline-flex items-center gap-1.5 text-xs font-bold text-qiyas-teal hover:underline mb-2"
+              >
+                <svg class="w-4 h-4 transform ${isAr ? '' : 'rotate-180'}" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+                ${t('backToSubjects')}
+              </button>
+              <h2 class="text-xl sm:text-2xl font-extrabold text-qiyas-navy">${t('physicsHubTitle')}</h2>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1">${t('physicsHubDesc')}</p>
+            </div>
+
+            <div class="flex items-center gap-2 self-start sm:self-center">
+              <span class="px-3.5 py-2 rounded-xl text-xs font-bold ${
+                state.isUnlocked
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                  : !state.freeQuizUsed
+                    ? 'bg-teal-50 text-qiyas-teal border border-teal-200'
+                    : 'bg-amber-50 text-amber-800 border border-amber-200'
+              }">
+                ${state.isUnlocked ? t('unlockedPill') : !state.freeQuizUsed ? t('freePill') : t('lockedPill')}
+              </span>
+            </div>
+          </div>
+
+          <!-- Section 1: Chapters 1–10 Grid -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between px-1">
+              <h3 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-emerald-200">
+                ${isAr ? 'أقسام المنهج (1 – 10)' : 'Curriculum Chapters (1 – 10)'}
+              </h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+              ${chapterCardsHtml}
+            </div>
+          </div>
+
+          <!-- Section 2: Comprehensive Final Exam (Part 11) -->
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center justify-between px-1">
+              <h3 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-amber-300">
+                ${isAr ? 'الاختبار الشامل (القسم 11)' : 'Comprehensive SAAT Exam (Part 11)'}
+              </h3>
+            </div>
+            ${comprehensiveCardHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    /**
+     * =========================================================================
+     * QUIZ SELECTION, MODE CHOICE & ONE-TIME 5-DIGIT ACCESS CODE FLOW
+     * =========================================================================
+     */
+    function handlePartClick(partId) {
+      const part = PHYSICS_PARTS.find((p) => p.id === partId);
+      if (!part) return;
+
+      state.selectedPartId = partId;
+
+      if (part.isComprehensive) {
+        // Part 11 directly generates 20 random questions across all previous chapters (1–10)
+        attemptStartQuiz({ partId: 11, mode: 'comprehensive' });
+        return;
+      }
+
+      // Parts 1–10: Ask whether student wants "This Part Only" or "Cumulative Revision"
+      openModeModal(part);
+    }
+
+    function openModeModal(part) {
+      const isAr = state.lang === 'ar';
+      document.getElementById('mode-modal-title').textContent = t('modeModalTitle');
+      document.getElementById('mode-selected-chapter').textContent = isAr ? part.titleAr : part.titleEn;
+      document.getElementById('mode-modal-desc').textContent = t('modeModalDesc');
+      document.getElementById('mode-single-title').textContent = t('modeSingleTitle');
+      document.getElementById('mode-single-sub').textContent = t('modeSingleSub');
+
+      const cumBtn = document.getElementById('btn-mode-cumulative');
+      if (part.id === 1) {
+        cumBtn.classList.add('hidden');
+      } else {
+        cumBtn.classList.remove('hidden');
+        document.getElementById('mode-cum-title').textContent = t('modeCumTitle');
+        document.getElementById('mode-cum-sub').textContent = t('modeCumSub');
+      }
+
+      const modal = document.getElementById('mode-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeModeModal() {
+      const modal = document.getElementById('mode-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function initiateQuizWithMode(mode) {
+      closeModeModal();
+      attemptStartQuiz({ partId: state.selectedPartId, mode });
+    }
+
+    function attemptStartQuiz(config) {
+      // Rule: 1st quiz is completely free; subsequent quizzes require the 5-digit access code ONCE
+      if (!state.freeQuizUsed || state.isUnlocked) {
+        if (!state.freeQuizUsed) {
+          state.freeQuizUsed = true;
+        }
+        startQuizEngine(config);
+      } else {
+        state.pendingQuizConfig = config;
+        openCodeModal();
+      }
+    }
+
+    function openCodeModal() {
+      document.getElementById('code-modal-title').textContent = t('codeModalTitle');
+      document.getElementById('code-modal-desc').textContent = t('codeModalDesc');
+      document.getElementById('code-error-msg').textContent = t('codeError');
+      document.getElementById('code-submit-btn').textContent = t('codeSubmit');
+
+      const input = document.getElementById('access-code-input');
+      input.value = '';
+      document.getElementById('code-error-msg').classList.add('hidden');
+
+      const modal = document.getElementById('code-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => input.focus(), 100);
+    }
+
+    function closeCodeModal() {
+      const modal = document.getElementById('code-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function submitAccessCode(e) {
+      e.preventDefault();
+      const inputVal = document.getElementById('access-code-input').value.trim();
+      if (inputVal === APP_CONFIG.accessCode) {
+        // Unlocked once for the entire session — will not ask again
+        state.isUnlocked = true;
+        closeCodeModal();
+        showToast(state.lang === 'ar' ? 'تم تفعيل رمز الدخول بنجاح! بالتوفيق في التدريب.' : 'Access code verified! All quizzes are now unlocked.');
+        if (state.pendingQuizConfig) {
+          const cfg = state.pendingQuizConfig;
+          state.pendingQuizConfig = null;
+          startQuizEngine(cfg);
+        }
+      } else {
+        document.getElementById('code-error-msg').classList.remove('hidden');
+      }
+    }
+
+    /**
+     * =========================================================================
+     * TEACHER ACCESS CODE SETTINGS MODAL
+     * =========================================================================
+     */
+    function openTeacherModal() {
+      document.getElementById('teacher-modal-title').textContent = t('teacherModalTitle');
+      document.getElementById('teacher-modal-desc').innerHTML = `
+        ${t('teacherModalDescPrefix')}
+        <strong class="text-qiyas-navy font-mono text-base mx-1">${APP_CONFIG.accessCode}</strong>.
+        ${t('teacherModalDescSuffix')}
+      `;
+      document.getElementById('teacher-input-label').textContent = t('teacherInputLabel');
+      document.getElementById('teacher-save-btn').textContent = t('teacherSave');
+      document.getElementById('teacher-reset-btn').textContent = t('teacherReset');
+      document.getElementById('teacher-new-code').value = APP_CONFIG.accessCode;
+
+      const modal = document.getElementById('teacher-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeTeacherModal() {
+      const modal = document.getElementById('teacher-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function updateTeacherCode() {
+      const val = document.getElementById('teacher-new-code').value.trim();
+      if (/^\d{5}$/.test(val)) {
+        APP_CONFIG.accessCode = val;
+        closeTeacherModal();
+        showToast(state.lang === 'ar' ? `تم تحديث رمز الدخول إلى ${val}` : `Access code updated to ${val}`);
+      } else {
+        showToast(state.lang === 'ar' ? 'يرجى إدخال 5 أرقام صحيحة.' : 'Please enter exactly 5 digits.');
+      }
+    }
+
+    function resetTrialLock() {
+      state.freeQuizUsed = true;
+      state.isUnlocked = false;
+      closeTeacherModal();
+      if (state.view === 'physics') renderPhysicsView();
+      showToast(state.lang === 'ar' ? 'تم تفعيل القفل: الاختبار القادم سيطلب الرمز.' : 'Access lock active: next quiz will require the 5-digit code.');
+    }
+
+    /**
+     * =========================================================================
+     * QUIZ GENERATOR & QIYAS COMPUTERIZED EXAM ENGINE (60s PER QUESTION)
+     * =========================================================================
+     */
+    function startQuizEngine({ partId, mode }) {
+      const part = PHYSICS_PARTS.find((p) => p.id === partId);
+      let pool = [];
+      let targetCount = APP_CONFIG.questionsPerPartQuiz;
+
+      if (partId === 11 || mode === 'comprehensive') {
+        pool = QUESTION_BANK.filter((q) => q.part >= 1 && q.part <= 10);
+        targetCount = APP_CONFIG.questionsPerComprehensive; // 20 questions for Part 11
+      } else if (mode === 'cumulative') {
+        pool = QUESTION_BANK.filter((q) => q.part >= 1 && q.part <= partId);
+      } else {
+        pool = QUESTION_BANK.filter((q) => q.part === partId);
+      }
+
+      const selectedQuestions = shuffleArray(pool).slice(0, targetCount);
+
+      // Initialize a dedicated 60-second timer for each question
+      const questionTimers = {};
+      selectedQuestions.forEach((_, idx) => {
+        questionTimers[idx] = APP_CONFIG.secondsPerQuestion;
+      });
+
+      const modeTagAr =
+        partId === 11
+          ? ''
+          : mode === 'cumulative'
+            ? ' (مراجعة تراكمية)'
+            : ' (هذا القسم فقط)';
+      const modeTagEn =
+        partId === 11
+          ? ''
+          : mode === 'cumulative'
+            ? ' (Cumulative Revision)'
+            : ' (Part Only)';
+
+      state.exam = {
+        partId,
+        titleAr: `${part.titleAr}${modeTagAr}`,
+        titleEn: `${part.titleEn}${modeTagEn}`,
+        questions: selectedQuestions,
+        currentIndex: 0,
+        answers: {},
+        flagged: {},
+        questionTimers,
+        expiredQuestions: {},
+        elapsedSeconds: 0,
+        timerInterval: null,
+        fontSize: 'md'
+      };
+
+      state.view = 'exam';
+      renderExamView();
+      startExamTimer();
+    }
+
+    function startExamTimer() {
+      if (state.exam.timerInterval) clearInterval(state.exam.timerInterval);
+
+      state.exam.timerInterval = setInterval(() => {
+        state.exam.elapsedSeconds++;
+
+        const idx = state.exam.currentIndex;
+        if (!state.exam.expiredQuestions[idx]) {
+          state.exam.questionTimers[idx] = Math.max(0, (state.exam.questionTimers[idx] ?? APP_CONFIG.secondsPerQuestion) - 1);
+          const qRemaining = state.exam.questionTimers[idx];
+
+          const timerDisplay = document.getElementById('exam-timer-text');
+          const timerBox = document.getElementById('exam-timer-box');
+          const timerBar = document.getElementById('exam-timer-bar');
+          if (timerDisplay) {
+            timerDisplay.textContent = formatTime(qRemaining);
+            if (timerBar) {
+              const pct = Math.max(0, Math.min(100, (qRemaining / APP_CONFIG.secondsPerQuestion) * 100));
+              timerBar.style.width = `${pct}%`;
+              if (qRemaining <= 10) {
+                timerBar.classList.remove('bg-qiyas-teal');
+                timerBar.classList.add('bg-rose-500');
+              }
+            }
+            if (qRemaining <= 10 && timerBox) {
+              timerBox.classList.remove('bg-qiyas-navyLight', 'text-white');
+              timerBox.classList.add('bg-rose-600', 'text-white', 'timer-urgent');
+            }
+          }
+
+          if (qRemaining <= 0) {
+            handleQuestionTimeExpired(idx);
+          }
+        }
+      }, 1000);
+    }
+
+    function handleQuestionTimeExpired(expiredIdx) {
+      state.exam.expiredQuestions[expiredIdx] = true;
+      const total = state.exam.questions.length;
+
+      // Find next unexpired question, or finish exam if all questions are completed/expired
+      let nextUnexpired = -1;
+      for (let i = expiredIdx + 1; i < total; i++) {
+        if (!state.exam.expiredQuestions[i]) {
+          nextUnexpired = i;
+          break;
+        }
+      }
+      if (nextUnexpired === -1) {
+        for (let i = 0; i < expiredIdx; i++) {
+          if (!state.exam.expiredQuestions[i]) {
+            nextUnexpired = i;
+            break;
+          }
+        }
+      }
+
+      if (nextUnexpired !== -1) {
+        showToast(
+          state.lang === 'ar'
+            ? `انتهى وقت السؤال ${expiredIdx + 1} (60 ثانية)! تم الانتقال للسؤال التالي.`
+            : `Time expired for Question ${expiredIdx + 1} (60s)! Moving to the next question.`
+        );
+        state.exam.currentIndex = nextUnexpired;
+        renderExamView();
+      } else {
+        showToast(
+          state.lang === 'ar'
+            ? 'انتهى وقت جميع الأسئلة! جاري عرض النتيجة.'
+            : 'Time expired for all questions! Submitting your exam.'
+        );
+        finishExam();
+      }
+    }
+
+    /**
+     * =========================================================================
+     * VIEW 3: QIYAS COMPUTERIZED EXAM INTERFACE (اختبار محوسب)
+     * =========================================================================
+     */
+    function renderExamView() {
+      const root = document.getElementById('app-root');
+      const isAr = state.lang === 'ar';
+      const { questions, currentIndex, answers, flagged, questionTimers, expiredQuestions, fontSize } = state.exam;
+      const q = questions[currentIndex];
+      const total = questions.length;
+      const isFlagged = !!flagged[currentIndex];
+      const isExpired = !!expiredQuestions[currentIndex];
+      const currentRemaining = questionTimers[currentIndex] ?? APP_CONFIG.secondsPerQuestion;
+      const timerPct = Math.max(0, Math.min(100, (currentRemaining / APP_CONFIG.secondsPerQuestion) * 100));
+      const selectedOpt = answers[currentIndex];
+      const letters = t('optionLetters');
+      const candidateDisplay = state.studentName.trim() || t('defaultStudent');
+
+      const questionSizeClass =
+        fontSize === 'lg'
+          ? 'text-xl sm:text-2xl'
+          : fontSize === 'sm'
+            ? 'text-base sm:text-lg'
+            : 'text-lg sm:text-xl';
+
+      const optionSizeClass =
+        fontSize === 'lg'
+          ? 'text-lg sm:text-xl'
+          : fontSize === 'sm'
+            ? 'text-sm sm:text-base'
+            : 'text-base sm:text-lg';
+
+      const optionsHtml = (isAr ? q.optionsAr : q.optionsEn)
+        .map((optText, idx) => {
+          const isSelected = selectedOpt === idx;
+          return `
+            <button
+              type="button"
+              ${isExpired ? 'disabled' : ''}
+              onclick="selectOption(${idx})"
+              class="qiyas-option w-full text-start p-4 sm:p-5 rounded-2xl border-2 flex items-center gap-4 ${
+                isExpired ? 'option-locked opacity-70 cursor-not-allowed' : ''
+              } ${
+                isSelected
+                  ? 'border-qiyas-teal bg-teal-50/80 shadow-sm'
+                  : 'border-slate-200 bg-white hover:border-slate-300'
+              }"
+            >
+              <!-- Radio Circle + Letter Badge -->
+              <div class="flex items-center gap-3 shrink-0">
+                <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                  isSelected ? 'border-qiyas-teal bg-qiyas-teal' : 'border-slate-400'
+                }">
+                  ${isSelected ? '<div class="w-2 h-2 rounded-full bg-white"></div>' : ''}
+                </div>
+                <span class="w-8 h-8 rounded-lg font-extrabold text-sm flex items-center justify-center ${
+                  isSelected ? 'bg-qiyas-teal text-white' : 'bg-slate-100 text-slate-700'
+                }">
+                  ${letters[idx]}
+                </span>
+              </div>
+
+              <!-- Option Text -->
+              <div class="font-semibold text-slate-800 ${optionSizeClass} leading-relaxed flex-1">
+                ${optText}
+              </div>
+            </button>
+          `;
+        })
+        .join('');
+
+      // Mini Question Navigator Strip
+      const navPillsHtml = questions
+        .map((_, idx) => {
+          const answered = answers[idx] !== undefined;
+          const flag = !!flagged[idx];
+          const exp = !!expiredQuestions[idx];
+          const active = idx === currentIndex;
+
+          let bgClass = 'bg-white text-slate-700 border-slate-300 hover:border-qiyas-teal';
+          if (flag) bgClass = 'bg-amber-400 text-slate-950 border-amber-500 font-extrabold';
+          else if (answered) bgClass = 'bg-emerald-600 text-white border-emerald-700 font-bold';
+          else if (exp) bgClass = 'bg-rose-100 text-rose-700 border-rose-300';
+
+          return `
+            <button
+              onclick="jumpToQuestion(${idx})"
+              class="w-9 h-9 rounded-lg border text-xs transition flex items-center justify-center relative ${bgClass} ${
+                active ? 'ring-2 ring-offset-2 ring-qiyas-navy scale-105' : ''
+              }"
+            >
+              ${idx + 1}
+              ${flag ? '<span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-600 border border-white"></span>' : ''}
+            </button>
+          `;
+        })
+        .join('');
+
+      root.innerHTML = `
+        <div class="flex-1 flex flex-col bg-transparent">
+          <!-- Qiyas Sub-Header Banner (Candidate, Section, Counter, Per-Question 60s Timer) -->
+          <div class="bg-slate-800 text-white border-t border-slate-700 px-4 sm:px-6 py-2.5">
+            <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+              <!-- Candidate & Section Info -->
+              <div class="flex items-center gap-3 text-xs sm:text-sm min-w-0">
+                <span class="px-2.5 py-1 rounded-lg bg-slate-700 text-slate-200 font-semibold shrink-0">
+                  ${t('candidateLabel')} <strong class="text-white">${candidateDisplay}</strong>
+                </span>
+                <span class="text-slate-300 truncate hidden md:inline">
+                  ${isAr ? state.exam.titleAr : state.exam.titleEn}
+                </span>
+              </div>
+
+              <!-- Counter & Per-Question 60s Timer -->
+              <div class="flex items-center gap-3 ms-auto">
+                <div class="px-3.5 py-1.5 rounded-xl bg-qiyas-teal text-white font-bold text-xs sm:text-sm shadow-sm">
+                  ${t('questionCounter')(currentIndex + 1, total)}
+                </div>
+
+                <div
+                  id="exam-timer-box"
+                  class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-mono font-extrabold text-sm sm:text-base transition ${
+                    currentRemaining <= 10 ? 'bg-rose-600 text-white timer-urgent' : 'bg-qiyas-navyLight text-white border border-slate-600'
+                  }"
+                >
+                  <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span class="text-xs font-sans font-semibold text-slate-300 hidden sm:inline">${t('questionTimerLabel')}:</span>
+                  <span id="exam-timer-text">${formatTime(currentRemaining)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Visual 60-Second Countdown Progress Bar -->
+          <div class="w-full h-1.5 bg-slate-200 overflow-hidden">
+            <div
+              id="exam-timer-bar"
+              style="width: ${timerPct}%"
+              class="h-full transition-all duration-700 ease-linear ${currentRemaining <= 10 ? 'bg-rose-500' : 'bg-qiyas-teal'}"
+            ></div>
+          </div>
+
+          <!-- Qiyas Toolbar (Flag, Font Size, Constants Sheet) -->
+          <div class="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 shadow-2xs">
+            <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
+              <!-- Flag Button -->
+              <button
+                onclick="toggleFlagCurrent()"
+                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold border transition ${
+                  isFlagged
+                    ? 'bg-amber-100 border-amber-400 text-amber-900'
+                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-amber-50 hover:border-amber-300'
+                }"
+              >
+                <svg class="w-4 h-4 ${isFlagged ? 'text-amber-600 fill-amber-500' : 'text-slate-500'}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                </svg>
+                <span>${isFlagged ? t('flaggedBtn') : t('flagBtn')}</span>
+              </button>
+
+              <!-- Right Tools: Font Size + Physics Constants -->
+              <div class="flex items-center gap-2">
+                <!-- Font Size Switcher -->
+                <div class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 p-0.5 text-xs font-bold">
+                  <button onclick="setExamFontSize('sm')" class="px-2.5 py-1 rounded-lg ${fontSize === 'sm' ? 'bg-white shadow-2xs text-qiyas-navy' : 'text-slate-500'}">A-</button>
+                  <button onclick="setExamFontSize('md')" class="px-2.5 py-1 rounded-lg ${fontSize === 'md' ? 'bg-white shadow-2xs text-qiyas-navy' : 'text-slate-500'}">A</button>
+                  <button onclick="setExamFontSize('lg')" class="px-2.5 py-1 rounded-lg ${fontSize === 'lg' ? 'bg-white shadow-2xs text-qiyas-navy' : 'text-slate-500'}">A+</button>
+                </div>
+
+                <!-- Physics Constants Button -->
+                <button
+                  onclick="openConstantsModal()"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-qiyas-teal border border-teal-200 text-xs sm:text-sm font-bold transition"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  <span>${t('constantsBtn')}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Question & Options Workspace -->
+          <div class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <!-- Question & Choices Card (8 cols on desktop) -->
+            <div class="lg:col-span-8 bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
+              ${
+                isExpired
+                  ? `<div class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm font-bold">
+                       ${t('questionExpiredNotice')}
+                     </div>`
+                  : ''
+              }
+
+              <!-- Question Stem -->
+              <div class="pb-5 border-b border-slate-100">
+                <div class="inline-flex items-center gap-2 text-xs font-bold text-qiyas-teal bg-teal-50 px-3 py-1 rounded-lg mb-3">
+                  <span>#${currentIndex + 1}</span>
+                </div>
+                <p class="font-bold text-slate-900 ${questionSizeClass} leading-relaxed">
+                  ${isAr ? q.qAr : q.qEn}
+                </p>
+              </div>
+
+              <!-- 4 Answer Choices -->
+              <div class="space-y-3">
+                ${optionsHtml}
+              </div>
+            </div>
+
+            <!-- Side Question Navigator Panel (4 cols on desktop) -->
+            <div class="lg:col-span-4 bg-white rounded-3xl p-5 shadow-sm border border-slate-200 space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h4 class="font-bold text-sm text-qiyas-navy">${t('reviewModalTitle')}</h4>
+                <button
+                  onclick="openReviewGridModal()"
+                  class="text-xs font-bold text-qiyas-teal hover:underline"
+                >
+                  ${t('reviewAllBtn')}
+                </button>
+              </div>
+
+              <!-- Numbered Question Grid -->
+              <div class="grid grid-cols-5 gap-2">
+                ${navPillsHtml}
+              </div>
+
+              <!-- Legend -->
+              <div class="pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-[11px] font-semibold text-slate-600">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-3 h-3 rounded-xs bg-emerald-600 inline-block"></span>
+                  <span>${t('legendAnswered')}</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="w-3 h-3 rounded-xs bg-white border border-slate-400 inline-block"></span>
+                  <span>${t('legendUnanswered')}</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="w-3 h-3 rounded-xs bg-amber-400 inline-block"></span>
+                  <span>${t('legendFlagged')}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Qiyas Navigation Footer -->
+          <div class="bg-white border-t border-slate-200 px-4 sm:px-6 py-3.5 sticky bottom-0 z-30 shadow-inner">
+            <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
+              <!-- Previous Button -->
+              <button
+                onclick="prevQuestion()"
+                ${currentIndex === 0 ? 'disabled' : ''}
+                class="px-4 sm:px-6 py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 transition flex items-center gap-2 ${
+                  currentIndex === 0
+                    ? 'border-slate-200 text-slate-300 cursor-not-allowed'
+                    : 'border-slate-300 text-slate-700 hover:bg-slate-100'
+                }"
+              >
+                <svg class="w-4 h-4 transform ${isAr ? '' : 'rotate-180'}" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+                <span>${t('prevBtn')}</span>
+              </button>
+
+              <!-- Center Review All / End Exam -->
+              <button
+                onclick="openReviewGridModal()"
+                class="px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-slate-800 hover:bg-slate-900 text-white transition"
+              >
+                ${t('reviewAllBtn')}
+              </button>
+
+              <!-- Next OR End Exam Button -->
+              ${
+                currentIndex < total - 1
+                  ? `
+                    <button
+                      onclick="nextQuestion()"
+                      class="px-5 sm:px-7 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-qiyas-teal hover:bg-qiyas-tealHover text-white shadow transition flex items-center gap-2"
+                    >
+                      <span>${t('nextBtn')}</span>
+                      <svg class="w-4 h-4 transform ${isAr ? 'rotate-180' : ''}" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  `
+                  : `
+                    <button
+                      onclick="openReviewGridModal()"
+                      class="px-5 sm:px-7 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-rose-600 hover:bg-rose-700 text-white shadow transition"
+                    >
+                      ${t('endExamBtn')}
+                    </button>
+                  `
+              }
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function selectOption(optIdx) {
+      if (state.exam.expiredQuestions[state.exam.currentIndex]) return;
+      state.exam.answers[state.exam.currentIndex] = optIdx;
+      playUiTone('select');
+      renderExamView();
+    }
+
+    function toggleFlagCurrent() {
+      const idx = state.exam.currentIndex;
+      if (state.exam.flagged[idx]) {
+        delete state.exam.flagged[idx];
+      } else {
+        state.exam.flagged[idx] = true;
+      }
+      playUiTone('flag');
+      renderExamView();
+    }
+
+    function setExamFontSize(size) {
+      state.exam.fontSize = size;
+      renderExamView();
+    }
+
+    function prevQuestion() {
+      if (state.exam.currentIndex > 0) {
+        state.exam.currentIndex--;
+        renderExamView();
+      }
+    }
+
+    function nextQuestion() {
+      if (state.exam.currentIndex < state.exam.questions.length - 1) {
+        state.exam.currentIndex++;
+        renderExamView();
+      }
+    }
+
+    function jumpToQuestion(idx) {
+      state.exam.currentIndex = idx;
+      closeReviewGridModal();
+      renderExamView();
+    }
+
+    /**
+     * =========================================================================
+     * EXAM REVIEW GRID & CONSTANTS MODALS
+     * =========================================================================
+     */
+    function openReviewGridModal() {
+      const { questions, answers, flagged } = state.exam;
+      const total = questions.length;
+      const answeredCount = Object.keys(answers).length;
+      const flaggedCount = Object.keys(flagged).length;
+      const unansweredCount = total - answeredCount;
+
+      document.getElementById('review-modal-title').textContent = t('reviewModalTitle');
+      document.getElementById('stat-answered-count').textContent = answeredCount;
+      document.getElementById('stat-answered-lbl').textContent = t('statAnswered');
+      document.getElementById('stat-unanswered-count').textContent = unansweredCount;
+      document.getElementById('stat-unanswered-lbl').textContent = t('statUnanswered');
+      document.getElementById('stat-flagged-count').textContent = flaggedCount;
+      document.getElementById('stat-flagged-lbl').textContent = t('statFlagged');
+      document.getElementById('end-exam-warn').textContent = t('endExamWarn');
+      document.getElementById('review-continue-btn').textContent = t('reviewContinueBtn');
+      document.getElementById('review-finish-btn').textContent = t('reviewFinishBtn');
+
+      const grid = document.getElementById('review-grid-buttons');
+      grid.innerHTML = questions
+        .map((_, idx) => {
+          const isAns = answers[idx] !== undefined;
+          const isFlg = !!flagged[idx];
+          let cls = 'bg-slate-100 text-slate-700 border-slate-300';
+          if (isFlg) cls = 'bg-amber-400 text-slate-950 border-amber-500 font-extrabold';
+          else if (isAns) cls = 'bg-emerald-600 text-white border-emerald-700 font-bold';
+
+          return `
+            <button
+              onclick="jumpToQuestion(${idx})"
+              class="py-2.5 rounded-xl border text-sm transition hover:opacity-90 ${cls}"
+            >
+              ${idx + 1}
+            </button>
+          `;
+        })
+        .join('');
+
+      const modal = document.getElementById('review-grid-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeReviewGridModal() {
+      const modal = document.getElementById('review-grid-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function openConstantsModal() {
+      document.getElementById('constants-modal-title').textContent = t('constantsBtn');
+      const modal = document.getElementById('constants-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeConstantsModal() {
+      const modal = document.getElementById('constants-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function finishExam() {
+      clearInterval(state.exam.timerInterval);
+      closeReviewGridModal();
+
+      // Record session mastery stats for the completed chapter
+      const { questions, answers, partId } = state.exam;
+      if (partId && questions.length > 0) {
+        let correctCount = 0;
+        questions.forEach((q, idx) => {
+          if (answers[idx] === q.correct) correctCount++;
+        });
+        const pct = Math.round((correctCount / questions.length) * 100);
+        const prev = state.chapterStats[partId] || { attempts: 0, bestPct: 0 };
+        state.chapterStats[partId] = {
+          attempts: prev.attempts + 1,
+          bestPct: Math.max(prev.bestPct, pct)
+        };
+      }
+
+      playUiTone('complete');
+      state.view = 'results';
+      renderResultsView();
+    }
+
+    /**
+     * =========================================================================
+     * VIEW 4: DETAILED SCORE REPORT & ANSWER REVIEW
+     * =========================================================================
+     */
+    function renderResultsView() {
+      const root = document.getElementById('app-root');
+      const isAr = state.lang === 'ar';
+      const { questions, answers, elapsedSeconds } = state.exam;
+      const total = questions.length;
+      const letters = t('optionLetters');
+
+      let correctCount = 0;
+      questions.forEach((q, idx) => {
+        if (answers[idx] === q.correct) correctCount++;
+      });
+      const wrongCount = total - correctCount;
+      const percentage = Math.round((correctCount / total) * 100);
+
+      const badgeColor =
+        percentage >= 80
+          ? 'text-emerald-600 bg-emerald-50 border-emerald-200'
+          : percentage >= 60
+            ? 'text-amber-600 bg-amber-50 border-amber-200'
+            : 'text-rose-600 bg-rose-50 border-rose-200';
+
+      const reviewCardsHtml = questions
+        .map((q, idx) => {
+          const userAns = answers[idx];
+          const isCorrect = userAns === q.correct;
+          const opts = isAr ? q.optionsAr : q.optionsEn;
+
+          return `
+            <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-xs border-2 ${
+              isCorrect ? 'border-emerald-200' : 'border-rose-200'
+            } space-y-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-start gap-3">
+                  <span class="w-8 h-8 rounded-lg font-extrabold text-sm flex items-center justify-center shrink-0 ${
+                    isCorrect ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
+                  }">
+                    ${idx + 1}
+                  </span>
+                  <p class="font-bold text-slate-900 text-base sm:text-lg leading-relaxed">
+                    ${isAr ? q.qAr : q.qEn}
+                  </p>
+                </div>
+                <span class="px-2.5 py-1 rounded-lg text-xs font-extrabold shrink-0 ${
+                  isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                }">
+                  ${isCorrect ? '✓' : '✕'}
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                <!-- Student Choice -->
+                <div class="p-3.5 rounded-xl border ${
+                  isCorrect
+                    ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900'
+                    : 'bg-rose-50/70 border-rose-200 text-rose-900'
+                }">
+                  <span class="block text-xs font-bold opacity-75 mb-1">${t('yourAnswerLabel')}</span>
+                  <span class="font-bold">
+                    ${
+                      userAns !== undefined
+                        ? `${letters[userAns]}) ${opts[userAns]}`
+                        : t('notAnsweredLabel')
+                    }
+                  </span>
+                </div>
+
+                <!-- Correct Choice -->
+                <div class="p-3.5 rounded-xl bg-teal-50/80 border border-teal-200 text-teal-950">
+                  <span class="block text-xs font-bold text-qiyas-teal mb-1">${t('correctAnswerLabel')}</span>
+                  <span class="font-bold">${letters[q.correct]}) ${opts[q.correct]}</span>
+                </div>
+              </div>
+
+              <!-- Scientific Explanation -->
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <strong class="text-qiyas-navy">${t('explanationLabel')}</strong>
+                ${isAr ? q.expAr : q.expEn}
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+      root.innerHTML = `
+        <div class="max-w-5xl mx-auto w-full px-4 sm:px-6 py-8 space-y-8 animate-view-enter">
+          <!-- Score Summary Card -->
+          <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+              <div>
+                <span class="text-xs font-bold text-qiyas-teal uppercase tracking-wider">${t('resultsHeader')}</span>
+                <h2 class="text-xl sm:text-2xl font-extrabold text-qiyas-navy mt-1">
+                  ${isAr ? state.exam.titleAr : state.exam.titleEn}
+                </h2>
+              </div>
+
+              <div class="px-5 py-3 rounded-2xl border-2 text-center ${badgeColor}">
+                <div class="text-xs font-bold uppercase">${t('scoreLabel')}</div>
+                <div class="text-3xl font-extrabold">${percentage}%</div>
+              </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-3 gap-3 sm:gap-5 text-center">
+              <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
+                <div class="text-2xl sm:text-3xl font-extrabold text-emerald-700">${correctCount} / ${total}</div>
+                <div class="text-xs font-bold text-emerald-800 mt-1">${t('correctCountLabel')}</div>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200">
+                <div class="text-2xl sm:text-3xl font-extrabold text-rose-700">${wrongCount}</div>
+                <div class="text-xs font-bold text-rose-800 mt-1">${t('wrongCountLabel')}</div>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-slate-100 border border-slate-200">
+                <div class="text-2xl sm:text-3xl font-extrabold text-qiyas-navy font-mono">${formatTime(elapsedSeconds)}</div>
+                <div class="text-xs font-bold text-slate-600 mt-1">${t('timeSpentLabel')}</div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+              <button
+                onclick="handlePartClick(${state.selectedPartId || 1})"
+                class="flex-1 py-3.5 px-5 rounded-xl bg-qiyas-teal hover:bg-qiyas-tealHover text-white font-bold text-sm shadow transition"
+              >
+                ${t('retryNewRandomBtn')}
+              </button>
+              <button
+                onclick="navigateTo('physics')"
+                class="flex-1 py-3.5 px-5 rounded-xl border-2 border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-sm transition"
+              >
+                ${t('backToPartsBtn')}
+              </button>
+            </div>
+          </div>
+
+          <!-- Detailed Question-by-Question Review -->
+          <div class="space-y-4">
+            <h3 class="text-lg sm:text-xl font-extrabold text-white px-1">
+              ${t('detailedReviewTitle')}
+            </h3>
+            ${reviewCardsHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    // Keyboard shortcuts during computerized exam (1-4 / A-D to answer, F to flag, Arrows to navigate)
+    document.addEventListener('keydown', (e) => {
+      if (state.view !== 'exam') return;
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+
+      const key = e.key.toUpperCase();
+      if (['1', 'A'].includes(key)) selectOption(0);
+      else if (['2', 'B'].includes(key)) selectOption(1);
+      else if (['3', 'C'].includes(key)) selectOption(2);
+      else if (['4', 'D'].includes(key)) selectOption(3);
+      else if (key === 'F') toggleFlagCurrent();
+      else if (e.key === 'ArrowRight') {
+        state.lang === 'ar' ? prevQuestion() : nextQuestion();
+      } else if (e.key === 'ArrowLeft') {
+        state.lang === 'ar' ? nextQuestion() : prevQuestion();
+      }
+    });
+
+    // Initialize Application on Load
+    window.onload = function () {
+      updateHeaderUI();
+      renderCurrentView();
+    };
+  </script>
+</body>
+</html>

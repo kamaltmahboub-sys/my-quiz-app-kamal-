@@ -1,0 +1,8 @@
+{
+  "name": "Remix SAAT Computerized Practice Platform",
+  "description": "Bilingual (English/Arabic) practice exam platform for SAAT Physics preparation featuring 403 verified questions across all 8 chapters with lesson-based parts, figures, and instant explanations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

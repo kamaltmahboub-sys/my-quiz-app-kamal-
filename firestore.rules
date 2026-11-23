@@ -1,0 +1,154 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global safety net: deny everything by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        request.auth.token.email == 'kamal@kntbook.com' ||
+        request.auth.token.email == 'kamal.t.mahboub@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidQuestion(data) {
+      return data.keys().hasAll([
+          'id', 'part', 'qAr', 'qEn', 'optionsAr', 'optionsEn', 'correct', 'expAr', 'expEn', 'updatedAt', 'updatedBy'
+        ]) &&
+        data.keys().hasOnly([
+          'id', 'part', 'subPart', 'qAr', 'qEn', 'optionsAr', 'optionsEn', 'correct', 'expAr', 'expEn', 'updatedAt', 'updatedBy'
+        ]) &&
+        data.id is string &&
+        data.id.size() >= 2 &&
+        data.id.size() <= 64 &&
+        data.id.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.part is int &&
+        data.part >= 1 &&
+        data.part <= 10 &&
+        (!('subPart' in data) || (data.subPart is int && data.subPart >= 1 && data.subPart <= 10)) &&
+        data.qAr is string &&
+        data.qAr.size() >= 1 &&
+        data.qAr.size() <= 2000 &&
+        data.qEn is string &&
+        data.qEn.size() >= 1 &&
+        data.qEn.size() <= 2000 &&
+        data.optionsAr is list &&
+        data.optionsAr.size() == 4 &&
+        data.optionsAr[0] is string && data.optionsAr[0].size() >= 1 && data.optionsAr[0].size() <= 500 &&
+        data.optionsAr[1] is string && data.optionsAr[1].size() >= 1 && data.optionsAr[1].size() <= 500 &&
+        data.optionsAr[2] is string && data.optionsAr[2].size() >= 1 && data.optionsAr[2].size() <= 500 &&
+        data.optionsAr[3] is string && data.optionsAr[3].size() >= 1 && data.optionsAr[3].size() <= 500 &&
+        data.optionsEn is list &&
+        data.optionsEn.size() == 4 &&
+        data.optionsEn[0] is string && data.optionsEn[0].size() >= 1 && data.optionsEn[0].size() <= 500 &&
+        data.optionsEn[1] is string && data.optionsEn[1].size() >= 1 && data.optionsEn[1].size() <= 500 &&
+        data.optionsEn[2] is string && data.optionsEn[2].size() >= 1 && data.optionsEn[2].size() <= 500 &&
+        data.optionsEn[3] is string && data.optionsEn[3].size() >= 1 && data.optionsEn[3].size() <= 500 &&
+        data.correct is int &&
+        data.correct >= 0 &&
+        data.correct <= 3 &&
+        data.expAr is string &&
+        data.expAr.size() <= 2000 &&
+        data.expEn is string &&
+        data.expEn.size() <= 2000 &&
+        data.updatedAt is timestamp &&
+        data.updatedBy is string &&
+        data.updatedBy.size() >= 1 &&
+        data.updatedBy.size() <= 128 &&
+        data.updatedBy == request.auth.uid;
+    }
+
+    function isValidPlatformConfig(data) {
+      return data.keys().hasAll([
+          'accessCode', 'questionsPerPartQuiz', 'questionsPerComprehensive', 'secondsPerQuestion', 'updatedAt', 'updatedBy'
+        ]) &&
+        data.keys().hasOnly([
+          'accessCode', 'questionsPerPartQuiz', 'questionsPerComprehensive', 'secondsPerQuestion', 'updatedAt', 'updatedBy'
+        ]) &&
+        data.accessCode is string &&
+        data.accessCode.size() == 5 &&
+        data.accessCode.matches('^[0-9]{5}$') &&
+        data.questionsPerPartQuiz is int &&
+        data.questionsPerPartQuiz >= 1 &&
+        data.questionsPerPartQuiz <= 50 &&
+        data.questionsPerComprehensive is int &&
+        data.questionsPerComprehensive >= 1 &&
+        data.questionsPerComprehensive <= 100 &&
+        data.secondsPerQuestion is int &&
+        data.secondsPerQuestion >= 10 &&
+        data.secondsPerQuestion <= 300 &&
+        data.updatedAt is timestamp &&
+        data.updatedBy is string &&
+        data.updatedBy.size() >= 1 &&
+        data.updatedBy.size() <= 128 &&
+        data.updatedBy == request.auth.uid;
+    }
+
+    match /questions/{questionId} {
+      allow get: if isValidId(questionId);
+      allow list: if resource.data.part is int && resource.data.part >= 1 && resource.data.part <= 10;
+      allow create: if isAdmin() &&
+        isValidId(questionId) &&
+        isValidQuestion(incoming()) &&
+        incoming().id == questionId &&
+        incoming().updatedAt == request.time;
+      allow update: if isAdmin() &&
+        isValidId(questionId) &&
+        isValidQuestion(incoming()) &&
+        incoming().id == existing().id &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'part', 'subPart', 'qAr', 'qEn', 'optionsAr', 'optionsEn', 'correct', 'expAr', 'expEn', 'updatedAt', 'updatedBy'
+        ]);
+      allow delete: if isAdmin() && isValidId(questionId);
+    }
+
+    match /config/{configId} {
+      allow get: if isValidId(configId) && configId == 'public';
+      allow list: if false;
+      allow create: if isAdmin() &&
+        isValidId(configId) &&
+        configId == 'public' &&
+        isValidPlatformConfig(incoming()) &&
+        incoming().updatedAt == request.time;
+      allow update: if isAdmin() &&
+        isValidId(configId) &&
+        configId == 'public' &&
+        isValidPlatformConfig(incoming()) &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'accessCode', 'questionsPerPartQuiz', 'questionsPerComprehensive', 'secondsPerQuestion', 'updatedAt', 'updatedBy'
+        ]);
+      allow delete: if false;
+    }
+
+    match /admins/{adminId} {
+      allow get: if isVerifiedUser() && isValidId(adminId) && request.auth.uid == adminId;
+      allow list, create, update, delete: if false;
+    }
+  }
+}

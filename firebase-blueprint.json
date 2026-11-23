@@ -1,0 +1,166 @@
+{
+  "entities": {
+    "Question": {
+      "title": "Question",
+      "description": "A bilingual (Arabic/English) SAAT Physics multiple-choice question with 4 options, answer index, optional chapter sub-part, and explanations.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique question identifier",
+          "minLength": 2,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "part": {
+          "type": "integer",
+          "description": "Physics chapter number (1 to 10)"
+        },
+        "subPart": {
+          "type": "integer",
+          "description": "Optional sub-part number within the chapter (1 to 10)"
+        },
+        "qAr": {
+          "type": "string",
+          "description": "Question prompt in Arabic",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "qEn": {
+          "type": "string",
+          "description": "Question prompt in English",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "optionsAr": {
+          "type": "array",
+          "description": "Four answer choices in Arabic"
+        },
+        "optionsEn": {
+          "type": "array",
+          "description": "Four answer choices in English"
+        },
+        "correct": {
+          "type": "integer",
+          "description": "Zero-based index of the correct answer (0-3)"
+        },
+        "expAr": {
+          "type": "string",
+          "description": "Scientific explanation in Arabic",
+          "maxLength": 2000
+        },
+        "expEn": {
+          "type": "string",
+          "description": "Scientific explanation in English",
+          "maxLength": 2000
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the question was last updated"
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "UID of the admin who updated the question",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "id",
+        "part",
+        "qAr",
+        "qEn",
+        "optionsAr",
+        "optionsEn",
+        "correct",
+        "expAr",
+        "expEn",
+        "updatedAt",
+        "updatedBy"
+      ]
+    },
+    "PlatformConfig": {
+      "title": "PlatformConfig",
+      "description": "Global quiz platform settings including the 5-digit student access code and timing configuration.",
+      "type": "object",
+      "properties": {
+        "accessCode": {
+          "type": "string",
+          "description": "Five-digit student access code",
+          "minLength": 5,
+          "maxLength": 5,
+          "pattern": "^[0-9]{5}$"
+        },
+        "questionsPerPartQuiz": {
+          "type": "integer",
+          "description": "Number of questions per chapter/part quiz"
+        },
+        "questionsPerComprehensive": {
+          "type": "integer",
+          "description": "Number of questions in the comprehensive Chapter 11 exam"
+        },
+        "secondsPerQuestion": {
+          "type": "integer",
+          "description": "Timer duration per question in seconds"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of the last config update"
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "UID of the admin who updated the config",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "accessCode",
+        "questionsPerPartQuiz",
+        "questionsPerComprehensive",
+        "secondsPerQuestion",
+        "updatedAt",
+        "updatedBy"
+      ]
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Authorized teacher/admin account allowed to manage the question bank and access code.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 150
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin"]
+        }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/questions/{questionId}": {
+      "schema": {
+        "$ref": "#/entities/Question"
+      },
+      "description": "Publicly readable SAAT Physics questions; writable only by verified admins."
+    },
+    "/config/{configId}": {
+      "schema": {
+        "$ref": "#/entities/PlatformConfig"
+      },
+      "description": "Public platform configuration document (configId = 'public'); writable only by verified admins."
+    },
+    "/admins/{adminId}": {
+      "schema": {
+        "$ref": "#/entities/AdminUser"
+      },
+      "description": "Read-only admin registry entries keyed by Firebase Auth UID."
+    }
+  }
+}
